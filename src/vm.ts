@@ -7,18 +7,15 @@ export interface CatalogItemVM extends MediaMaterial {
   selected: boolean;
   notSelected: boolean;
   qty: number;
-  fileLabel: string;
   catShort: string;
   fbStyle: React.CSSProperties;
   fbStyleSm: React.CSSProperties;
-  fileBadgeStyle: React.CSSProperties;
   wrapStyle: React.CSSProperties;
   rowStyle: React.CSSProperties;
   reqBtnStyle: React.CSSProperties;
   reqIcon: string;
   reqIconWrap: React.CSSProperties;
   reqLabel: string;
-  onDownload: () => void;
   onToggle: () => void;
   onInc: () => void;
   onDec: () => void;
@@ -81,7 +78,6 @@ export interface BoCatalogVM extends MediaMaterial {
   fbStyleSm: React.CSSProperties;
   onEdit: () => void;
   onDelete: () => void;
-  onDownload: () => void;
 }
 
 export interface MediaDraft {
@@ -91,8 +87,6 @@ export interface MediaDraft {
   description: string;
   maxAllowed: number | string;
   availableStock: number | string;
-  fileType: string;
-  fileSize: string;
   imageUrl: string;
 }
 

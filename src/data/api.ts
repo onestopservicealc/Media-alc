@@ -19,7 +19,7 @@ import { formatThaiDateTime } from '../lib/ui';
      saveMaterial        → insert/update media_materials (+ upload Storage)
      archiveMaterial     → update media_materials set is_archived = true
      getMyRequests       → rpc('get_requests_by_token', tokens[])
-     getDownloadUrl      → Storage.createSignedUrl(download_path)
+     uploadImage         → Storage.upload('media-previews') → getPublicUrl
    ========================================================================= */
 
 // ระบบเริ่มต้นแบบว่าง (ไม่มีการ seed ข้อมูลตัวอย่าง)
@@ -145,11 +145,6 @@ export async function archiveMaterial(id: string): Promise<void> {
   // localStorage เฟสนี้ลบออกจากรายการ; บน Supabase จะเป็น soft-delete (is_archived=true)
   write(KEYS.catalog, catalog.filter(m => m.id !== id));
   return delay(undefined);
-}
-
-/** คืน URL ดาวน์โหลดไฟล์จริง (ถ้ามี); ยังไม่มีที่เก็บไฟล์จนกว่าจะต่อ Supabase Storage */
-export async function getDownloadUrl(mat: MediaMaterial): Promise<string | null> {
-  return delay(mat.downloadUrl ?? null);
 }
 
 /**

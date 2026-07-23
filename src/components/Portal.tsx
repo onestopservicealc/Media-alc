@@ -63,7 +63,7 @@ export function Portal({ vm }: { vm: AppVM }) {
                     <span>บริการฟรีสำหรับหน่วยงานและประชาชน</span>
                   </div>
                   <h2 style={S("margin:16px 0 10px;font-family:'Kanit';font-weight:700;font-size:34px;line-height:1.2;letter-spacing:-.5px")}>ขอสื่อรณรงค์ป้องกันภัยแอลกอฮอล์<br />ง่าย ครบ จบในที่เดียว</h2>
-                  <p style={S('margin:0;font-size:15px;color:#c7ccd6;line-height:1.65')}>ดาวน์โหลดไฟล์ดิจิทัลได้ทันที หรือขอรับสื่อต้นฉบับ (แผ่นพับ โปสเตอร์ สติ๊กเกอร์ คู่มือ) จัดส่งฟรีถึงหน่วยงาน — ไม่เกิน 50 ชิ้นต่อรายการ</p>
+                  <p style={S('margin:0;font-size:15px;color:#c7ccd6;line-height:1.65')}>ขอรับสื่อต้นฉบับ (แผ่นพับ โปสเตอร์ สติ๊กเกอร์ คู่มือ) จัดส่งฟรีถึงหน่วยงาน — ไม่เกิน 50 ชิ้นต่อรายการ</p>
                 </div>
                 <div style={S('display:flex;gap:12px;flex-wrap:wrap')}>
                   <button onClick={vm.onStartRequest} style={S("display:inline-flex;align-items:center;gap:10px;padding:15px 26px;background:#e8112d;color:#fff;font-family:'Kanit';font-weight:600;font-size:15.5px;border:none;border-radius:999px;cursor:pointer;box-shadow:0 12px 30px -8px rgba(232,17,45,.6)")}>
@@ -71,8 +71,8 @@ export function Portal({ vm }: { vm: AppVM }) {
                     <span>เริ่มขอจัดส่งสื่อ (เล่มจริง)</span>
                   </button>
                   <button onClick={vm.onScrollCatalog} style={S("display:inline-flex;align-items:center;gap:9px;padding:15px 24px;background:rgba(255,255,255,.1);color:#fff;font-family:'Kanit';font-weight:500;font-size:15px;border:1px solid rgba(255,255,255,.18);border-radius:999px;cursor:pointer")}>
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                    <span>ดูสื่อ &amp; ดาวน์โหลดฟรี</span>
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
+                    <span>ดูคลังสื่อทั้งหมด</span>
                   </button>
                   <button onClick={vm.onOpenHistory} style={S("display:inline-flex;align-items:center;gap:9px;padding:15px 22px;background:transparent;color:#c7ccd6;font-family:'Kanit';font-weight:500;font-size:14.5px;border:1px solid rgba(255,255,255,.14);border-radius:999px;cursor:pointer")}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" /></svg>
@@ -106,7 +106,7 @@ export function Portal({ vm }: { vm: AppVM }) {
               <div style={S('display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px')}>
                 <div>
                   <h2 style={S("margin:0;font-family:'Kanit';font-weight:700;font-size:24px")}>คลังสื่อประชาสัมพันธ์</h2>
-                  <p style={S('margin:4px 0 0;font-size:13.5px;color:#6b7280')}>แต่ละรายการเลือกได้ 2 แบบ — <strong style={S('color:#111827')}>ดาวน์โหลดไฟล์ฟรีทันที</strong> หรือ <strong style={S('color:#e8112d')}>ขอจัดส่งเล่มจริง</strong></p>
+                  <p style={S('margin:4px 0 0;font-size:13.5px;color:#6b7280')}>เลือกสื่อที่ต้องการแล้ว <strong style={S('color:#e8112d')}>ขอจัดส่งเล่มจริง</strong> ถึงหน่วยงานฟรี — ไม่เกิน 50 ชิ้นต่อรายการ</p>
                 </div>
                 <div style={S("display:flex;align-items:center;gap:8px;background:#eef7f0;color:#047857;padding:8px 14px;border-radius:999px;border:1px solid #c9ecd5;font-size:12.5px;font-weight:600;font-family:'Kanit'")}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
@@ -139,15 +139,10 @@ export function Portal({ vm }: { vm: AppVM }) {
                       </div>
                       <img src={m.imageUrl} alt={m.title} referrerPolicy="no-referrer" onError={vm.onImgErr} style={S('position:absolute;inset:0;width:100%;height:100%;object-fit:cover')} />
                       <span style={S("position:absolute;top:12px;left:12px;font-size:11px;font-weight:600;padding:4px 11px;border-radius:999px;background:rgba(255,255,255,.94);color:#374151;font-family:'Kanit';z-index:2")}>{m.category}</span>
-                      <span style={m.fileBadgeStyle}>{m.fileLabel}</span>
                     </div>
                     <h3 style={S("margin:0 0 6px;font-family:'Kanit';font-weight:600;font-size:15.5px;line-height:1.4;min-height:44px")}>{m.title}</h3>
                     <p style={S('margin:0 0 14px;font-size:12.5px;color:#6b7280;line-height:1.55;min-height:39px')}>{m.description}</p>
-                    <div style={S('display:grid;grid-template-columns:1fr 1fr;gap:10px')}>
-                      <button onClick={m.onDownload} style={S("display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 8px;background:#fff;color:#111827;border:1.5px solid #d5d7dd;border-radius:12px;font-family:'Kanit';font-weight:500;font-size:13px;cursor:pointer")}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                        <span>โหลดฟรี</span>
-                      </button>
+                    <div style={S('display:grid;grid-template-columns:1fr;gap:10px')}>
                       <button onClick={m.onToggle} style={m.reqBtnStyle}>
                         <span style={m.reqIconWrap}>{m.reqIcon}</span>
                         <span>{m.reqLabel}</span>

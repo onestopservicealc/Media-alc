@@ -25,8 +25,6 @@ async function main() {
     max_allowed: m.maxAllowed,
     available_stock: m.availableStock ?? 0,
     image_url: m.imageUrl ?? null,
-    file_size: m.fileSize ?? null,
-    file_type: m.fileType ?? null,
   }));
   const { error: e1 } = await db.from('media_materials').upsert(materials, { onConflict: 'id' });
   if (e1) throw e1;

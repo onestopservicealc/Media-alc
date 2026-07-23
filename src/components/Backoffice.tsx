@@ -146,15 +146,7 @@ export function Backoffice({ vm }: { vm: AppVM }) {
                   <label style={S('display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px')}>คำอธิบายรายละเอียด <span style={S('color:#e8112d')}>*</span></label>
                   <textarea rows={2} value={d.description} onChange={e => vm.onDraftField('description', e.target.value)} placeholder="รายละเอียดเนื้อหาและขนาดกระดาษ..." style={S('width:100%;padding:10px 13px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:11px;font-size:13px;outline:none;resize:none;font-family:inherit')} />
                 </div>
-                <div style={S('display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px')}>
-                  <div>
-                    <label style={S('display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px')}>ฟอร์แมตไฟล์</label>
-                    <input type="text" value={d.fileType} onChange={e => vm.onDraftField('fileType', e.target.value)} style={S('width:100%;padding:10px 13px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:11px;font-size:13px;outline:none')} />
-                  </div>
-                  <div>
-                    <label style={S('display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px')}>ขนาดไฟล์</label>
-                    <input type="text" value={d.fileSize} onChange={e => vm.onDraftField('fileSize', e.target.value)} style={S('width:100%;padding:10px 13px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:11px;font-size:13px;outline:none')} />
-                  </div>
+                <div style={S('display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px')}>
                   <div>
                     <label style={S('display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px')}>จำกัด/ครั้ง (≤50)</label>
                     <input type="number" value={d.maxAllowed} onChange={e => vm.onDraftField('maxAllowed', e.target.value)} style={S("width:100%;padding:10px 13px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:11px;font-size:13px;outline:none;font-family:'Space Mono'")} />
@@ -199,7 +191,6 @@ export function Backoffice({ vm }: { vm: AppVM }) {
                   <div style={S('flex:1;min-width:200px')}>
                     <div style={S('display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px')}>
                       <span style={S("font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:999px;background:#f6f7f9;color:#6b7280;font-family:'Kanit'")}>{m.category}</span>
-                      <span style={S("font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:999px;background:#eff6ff;color:#2563eb;font-family:'Space Mono'")}>{m.fileType} · {m.fileSize}</span>
                     </div>
                     <h4 style={S("margin:0;font-family:'Kanit';font-weight:600;font-size:13.5px;line-height:1.35")}>{m.title}</h4>
                     <p style={S('margin:2px 0 0;font-size:12px;color:#9ca3af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:520px')}>{m.description}</p>

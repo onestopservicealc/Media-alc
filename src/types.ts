@@ -15,9 +15,6 @@ export interface MediaMaterial {
   maxAllowed: number;
   imageUrl?: string;
   availableStock?: number;
-  downloadUrl?: string;
-  fileSize?: string;
-  fileType?: string;
 }
 
 export interface MediaRequestForm {

@@ -14,10 +14,7 @@ create table media_materials (
   description     text        not null,
   max_allowed     int         not null default 50 check (max_allowed between 1 and 50),
   available_stock int         not null default 0  check (available_stock >= 0),
-  image_url       text,                          -- URL รูปพรีวิว (public bucket หรือ URL เดิม)
-  download_path   text,                          -- object path ใน bucket ส่วนตัว (แทน downloadUrl)
-  file_size       text,
-  file_type       text,
+  image_url       text,                          -- URL รูปพรีวิว (public bucket 'media-previews')
   is_archived     boolean     not null default false, -- soft delete
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()

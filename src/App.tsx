@@ -16,7 +16,7 @@ import { Toast } from './components/Toast';
 const DEFAULT_VIEW: 'portal' | 'backoffice' = 'portal';
 
 function blankDraft(): MediaDraft {
-  return { id: null, title: '', category: 'แผ่นพับ (Brochure)', description: '', maxAllowed: 50, availableStock: 1000, fileType: 'PDF', fileSize: '12.5 MB', imageUrl: '' };
+  return { id: null, title: '', category: 'แผ่นพับ (Brochure)', description: '', maxAllowed: 50, availableStock: 1000, imageUrl: '' };
 }
 
 const EMPTY_FORM: RequestFormState = { fullName: '', agency: '', phone: '', date: '', address: '', purpose: '' };
@@ -105,22 +105,6 @@ export default function App() {
     toastTimer.current = setTimeout(() => setSt(s => ({ ...s, toast: '' })), 3200);
   }, []);
   useEffect(() => () => clearTimeout(toastTimer.current), []);
-
-  const download = useCallback(async (mat: MediaMaterial) => {
-    const url = await api.getDownloadUrl(mat);
-    if (url) {
-      flash(`กำลังดาวน์โหลด "${mat.title.slice(0, 28)}..."`);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = '';
-      a.rel = 'noopener';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } else {
-      flash('ยังไม่มีไฟล์ให้ดาวน์โหลดสำหรับสื่อนี้');
-    }
-  }, [flash]);
 
   const toggle = useCallback((id: string) => {
     patch(s => {
@@ -229,8 +213,6 @@ export default function App() {
       maxAllowed: Number(d.maxAllowed) || 50,
       availableStock: Number(d.availableStock) || 1000,
       imageUrl: d.imageUrl.trim() || undefined,
-      fileType: d.fileType,
-      fileSize: d.fileSize,
     };
     await api.saveMaterial(mat, mode);
     patch({ boAddOpen: false });
@@ -272,11 +254,9 @@ export default function App() {
       const fb = fbFor(m.category);
       return {
         ...m, selected, notSelected: !selected, qty: st.qtys[m.id] || 0,
-        fileLabel: `${m.fileType} · ${m.fileSize}`,
         catShort: fb.short,
         fbStyle: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', background: fb.bg, color: fb.accent, textAlign: 'center', padding: '0 14px' },
         fbStyleSm: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: fb.bg, color: fb.accent },
-        fileBadgeStyle: { position: 'absolute', bottom: '12px', left: '12px', fontSize: '10.5px', fontWeight: 600, padding: '3px 9px', borderRadius: '999px', background: 'rgba(255,255,255,.94)', color: '#2563eb', fontFamily: 'Space Mono' },
         wrapStyle: { background: '#fff', border: selected ? '2px solid #e8112d' : '1px solid #eceef1', borderRadius: '20px', padding: selected ? '13px' : '14px', display: 'flex', flexDirection: 'column', transition: 'all .2s', boxShadow: selected ? '0 12px 30px -14px rgba(232,17,45,.35)' : 'none' },
         rowStyle: { display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 13px', borderRadius: '14px', border: selected ? '1.5px solid #e8112d' : '1px solid #eceef1', background: selected ? '#fff5f6' : '#fff', transition: 'all .2s' },
         reqBtnStyle: selected
@@ -285,7 +265,6 @@ export default function App() {
         reqIcon: selected ? '✓' : '＋',
         reqIconWrap: { fontWeight: 700, fontSize: '14px', lineHeight: 1 },
         reqLabel: selected ? 'เลือกแล้ว' : 'ขอเล่มจริง',
-        onDownload: () => download(m),
         onToggle: () => toggle(m.id),
         onInc: () => bump(m.id, 5),
         onDec: () => bump(m.id, -5),
@@ -360,7 +339,7 @@ export default function App() {
       return {
         ...m, stockText: (m.availableStock || 0).toLocaleString('en-US'),
         fbStyleSm: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: fb.bg, color: fb.accent },
-        onEdit: () => openEdit(m), onDelete: () => deleteMedia(m.id), onDownload: () => download(m),
+        onEdit: () => openEdit(m), onDelete: () => deleteMedia(m.id),
       };
     });
 
@@ -412,7 +391,7 @@ export default function App() {
       onImgErr,
       toast: st.toast,
     };
-  }, [st, patch, download, toggle, bump, setQty, startRequest, next, back, closeWizard, setForm, reqCard, setStatus, openEdit, deleteMedia, openAdd, setDraft, uploadDraftImage, saveDraft]);
+  }, [st, patch, toggle, bump, setQty, startRequest, next, back, closeWizard, setForm, reqCard, setStatus, openEdit, deleteMedia, openAdd, setDraft, uploadDraftImage, saveDraft]);
 
   return (
     <>

@@ -10,8 +10,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1QifjozdhP-_nAHvCjqaicSobYQO3NJMjfdqHQutGkMzfdIAyiwU8OQFpgV-DfSBnfZ38p8urc1nTeEMKugGelue2-43VFR9AKnZDhQhWql-HaXoLUzj9irD75E0AXCcVoUnadSwQJovxoZAlguyyQDoPtHh95Xpj8HRRqkx97Jfbb6zdngg9mIzu5uWQhHaC2wWGAFxKkJLhrh3teTc1QZ8l3Dd75-Vjq8eNWaZG4sA=w260",
     "availableStock": 8000,
-    "fileType": "PDF",
-    "fileSize": "4.2 MB"
   },
   {
     "id": "mat-002",
@@ -21,8 +19,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1Qifg9hA0H-xLchIJfSPmN0oboeRcKAGuK8ZY1jGxpNwEhaJi4SPhgysbVMB0PSA0WG_dTFbYNrQSpf6QFSKWVcofx3BvDPwYwhB2tVcfZVtuFx3EIchAS0JbjTdHvBcrO64df1mO2jq68MPKmlR5a4wo0tqqAYjnlAfgEqUTVTOnW0RfBAfmsXfeb3-v1IpXYRWmlZUHbX86-vA5LET3i6i2aznYvF-wR7yPlT0Wk-A=w260",
     "availableStock": 7200,
-    "fileType": "PDF",
-    "fileSize": "4.0 MB"
   },
   {
     "id": "mat-003",
@@ -32,8 +28,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1Qifhi9wh4418fQ7W7-gCfrpW4NPdMNf4yBSpT5s9Uildo_gELPzTsHr2Ci5AVH4laqcQ1neO_J42544CPNMWdh4y0C3LbqwJWN24iJwtnjHOtVfey87T30xK9AY5XSc7Ozcg7MuPLb04ZYISuQb7eQ_OBAy6UGVbQTIdbbquyXeblBZ-J8fdK1cqIXZXtALn5Bo9K_HRvWag7y9SHwmGQKDyqbHBVzOzg3wAoE2c=w260",
     "availableStock": 9000,
-    "fileType": "PDF",
-    "fileSize": "4.5 MB"
   },
   {
     "id": "mat-004",
@@ -43,8 +37,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1Qifhu6gVCqfVu2PDms13gfub89s-ARLO48bb-vv1ZVUPL4pcTwVjeyQzXa3cn_w4WLQQ1qHZQjwvgkzHDypkSE6iXYWwCV-Ii99BIloUWktPkmSqzUVfO4VqKZcKjx_nNcNYbsMmluEEYpdVTRf3JaHqmrG4fFS09jiBPsZxQ37EHCIys6q5HZmv7OxNgOLF9xEe0dg3HaupmbGUweL0QIJocPpjFMjXjSXN6iJ9Ygg=w260",
     "availableStock": 5500,
-    "fileType": "PDF",
-    "fileSize": "4.1 MB"
   },
   {
     "id": "mat-005",
@@ -54,8 +46,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1QifgOYwgZ_iknfkg1-MWnL3Zz9rB8K_g0HKxEBIjmFov8cZuPqaWNjrxhcRcqCXcC3QzWcLRyfRM8AzQpZxCPEWESlOTI0e_J0GBmy6k-cA7BPBWLg7Ofkc1JoC3dSzwKI9I8QcmS__blpotnWAtFXUzSSonBlnvf3j-sFZhD85bNZM5Iw2kX-Vh1Pm3CjcThpN9lDw829GwFvHFCiw2olpWfyt_adb9EzIW9EZbMjw=w260",
     "availableStock": 3000,
-    "fileType": "PDF",
-    "fileSize": "4.8 MB"
   },
   {
     "id": "mat-006",
@@ -65,8 +55,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1Qifh3aGbRpUuEmQYYlEMR2WeeoiBSS4obB3CR7z4_8zmjuNbi3Xwz8TW8opqZyI7Yaux1HiQYs3wVFsaVIS6-nCr6q9DI__iurnoMZ_lKvL0a2SvNTULzPg44cMcIu3p4_gPeo_rGNB4CXSshswHRvBfhUBLINYMvFsJ68DkB3ke99K60heuSw1VRLQljTFN3wFPCaqC5bknCHkEKOjL0kIUOIbXODcoiqi78tF0=w260",
     "availableStock": 3000,
-    "fileType": "PDF",
-    "fileSize": "4.8 MB"
   },
   {
     "id": "mat-007",
@@ -76,8 +64,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1QifjDIh7PU8lKvMz8blZQ81gTPYTtzbQBFDpPpkb6Kr4GEosipPo9mg6D3kGISFchf_Wgy2yhtngje9owcV2sJMW2Rx34U-9BMpd2Ry_cNH5_8HWmq9M3F5FedClpcJ7gPm5ItEgiClj9J2g2PlI2vLe5MgDO4cH-9LuS22yRvRSzvWnaKppXowjxTKjag2r5PRLT7VyvvKnCox39WjqPCovRHJeF-unnvYZ5Syo=w260",
     "availableStock": 3000,
-    "fileType": "PDF",
-    "fileSize": "4.8 MB"
   },
   {
     "id": "mat-008",
@@ -87,8 +73,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1Qifj7nFW5esll2lc_0Mb0rm1pf8K9s6816mYJJCjAD7dnnV9iCauJ0elB0Mbas4Nvyo0D-BqizbCk7to_h4sMXDaqI6JcPIrOoPFxczpbCyokLDAhSmtsKSSgOm5jqAaP3D342UPWXsYSZw_S5zJuonezAfq6OTIJ3VbmATfm_GfeQCv3cE1CGlVM8JjWrTGJxWrmJIziqtn_Ec5sdgnSCWL6shqlXnDfWmEbto-r-w=w260",
     "availableStock": 3000,
-    "fileType": "PDF",
-    "fileSize": "4.8 MB"
   },
   {
     "id": "mat-009",
@@ -98,8 +82,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1QifgxW-GcToTpMneJJ54QlP5pizF7pbnyyUcJwisEh20IYLaU2dJReKVBFNADIiqnUrWU9PNECxXNExu3uJ0x8iIhKvEDW9g6kQd8Inw0ef8iRSoYjFjMrnkPXbnR4v4m851RM9gR_V7pCktXNS6r-aJvpYcOutMTjgLd9G5XeGBDjKOkjvQmij5rJ1IGtNpj0SDXU9XaL9i5czaDOPhEkGejiW8ghXHzvNuGL4Elfg=w260",
     "availableStock": 3000,
-    "fileType": "PDF",
-    "fileSize": "4.8 MB"
   },
   {
     "id": "mat-010",
@@ -109,8 +91,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1QifjRWTgGawk3QvW3cMHFTWRzzuOJFDleHAvGV6uij9EhmJ52xp59ycDp9AnTKWitbWwx-cAIlcyU0thb02SRFfCZYPB9c6DyXg2edyVOCWDemjQ-ZMrqLE7EWkCp2cXawo2r-VDVMAobqj3mS8_3Df0aZbPJZxmz3F_aXTI7E-g_P2LOuvp2sNHvT0T-9WMG6lQ9QMbWcS2-N1rmodx1SQTrDri18uULWedSwI2TgQ=w260",
     "availableStock": 3000,
-    "fileType": "PDF",
-    "fileSize": "4.8 MB"
   },
   {
     "id": "mat-011",
@@ -120,8 +100,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1Qifjuuzt9Amg-uywSVLPSGE4CrL5hZ6tIv7ESviYPTWKY4ujexZmDqM2U9t_cXPYqHzWcAm7qkIdhYM8YEG1Ood62fVjJ7RyxN4RfP127VamYwkHhgaQlcICa-T_EeBbpGMK66dFuoDFuCDHhEA2Bp2CUgKC0f3S_FxftUanD2S2Vdky078argfyQCIvJkF8zCpNuN24Mpa-hcoJT05Dzh2YmZrwYF_iAHOo1rwLo_w=w260",
     "availableStock": 3000,
-    "fileType": "PDF",
-    "fileSize": "4.8 MB"
   },
   {
     "id": "mat-012",
@@ -131,8 +109,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1Qifje7M9yoyvUZKPeeWJUiN74qjpdPQZjyhS7srTRxB36KIB3K3qqqAieCzATQhkk8q_U_gpxPHwybOQoAb8dS6Db-ywT6hZ51ymioQyWBFfKJ_8DviQd4f-ARLlWeNc66CmgKZ3x9qsF9VJ4ofPfFfA0ekxDUf531BDNLZ_mqTE1PInf_024t_gC3DDuZ8DAKYZMYHMN-BTAZ2hRb6k5ZkZUgCNYaJ32jsWHJj3yBQ=w260",
     "availableStock": 3000,
-    "fileType": "PDF",
-    "fileSize": "4.8 MB"
   },
   {
     "id": "mat-013",
@@ -142,8 +118,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1Qifga2ngTI4QwfDxTKrPdW4KHyGXK2t_y3t1G7JvQj_aZ866CXgTNwyLm-5b37-jH330CDG7co7NAam7c4EqloUsQCxEYHl9AC1rXqssCNpcr3aI7UVJoNRMs8RtDXfZTAEgWux0TWQrM0rzXg2dnP0cfSZ_CpMSBBlF5FD1qlcKj_gIUC-vWNmsbSa7xh0l13wBOlAoQAjciSdjY55ZTqWfQ_a6uTW-rXWXSDqEbGw=w260",
     "availableStock": 3000,
-    "fileType": "PDF",
-    "fileSize": "4.8 MB"
   },
   {
     "id": "mat-014",
@@ -153,8 +127,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1Qifg2Ya7mlsKUkQPtwL4m1H2JUzboiYo_fZp6VbuB9GtYvJgLW7KJoCv1JW43iGLnBOGXrrk9MCoDDKi-wDivFZXSJObZKhtZcRNTydMguQzcjBP3P4yCrjeTeu0ltyhKkPYodEfuhxmtbY1abLi-s4VUkXOdUPBHYL-vXi3cOhV0_zttYR7xPVnbLbkpCKRickWhaADYS9JWz4uuShOn5rvq5TSenOHExGripXcx6Q=w260",
     "availableStock": 4000,
-    "fileType": "PDF",
-    "fileSize": "4.3 MB"
   },
   {
     "id": "mat-015",
@@ -164,8 +136,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1QifjFSUppuU_9ieV-wwzYuSDmFO0gcbLXBS4K4cip6bVeGZXeEeILj9tp6QyxyctGODCoiEXiP_0toDl8mET97u_OE0p-2Q4udcFhbvm-99csDXfORsJVl3cE68XHbAmZKPsoH1hKJ9h7nntCdaj9xzHLLWB6g-qCKwW5XjwOWEz5I1nfmBFhD0JJvTqoUsgAgqkeHu0FP8UwBuUXOWJeLrFjMGk4_1XtynMUCo33Uw=w260",
     "availableStock": 5000,
-    "fileType": "PDF",
-    "fileSize": "9.5 MB"
   },
   {
     "id": "mat-016",
@@ -175,8 +145,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1QifiljXmcaqz7zyR1Xtu5HeV37nj8Im_VXU7r18zURzIPceHt2cHrdH_m738DyDEchIboM7SJ-CVbt9bKbR4_5IJ1x5ZTGS4ro8nrpqiPqr9Vu8eqa7iqEAiJauRbPmyXzUK_ea2hdtK6_7JHav1XiF5RBIouSNASl_dulh2jGvBLyWkTQstNE_LEhkyIL-AuZsa5LO2wybA5wlwE1P0GpCWmW1uBbrZV3JrDdfMOeQ=w260",
     "availableStock": 5000,
-    "fileType": "PDF",
-    "fileSize": "9.8 MB"
   },
   {
     "id": "mat-017",
@@ -186,8 +154,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1QifhAoKbDoz0pPy42U7TWXoCXnTI8pc43gd4LvKGUH8WWOjz2e5zWObwVsBpXuo1tp4v0wQgT3P3ZZAIgpx5x01yEUgV1wMp5vkg_2kEhLgdrezoiQclNQg8mpGV9wgg_cacudm_4USg0QjoWL-HigCWsW9tgBnwLlBjpyO7j8HnwzCb9EdFlKvCR3Uy_MINe8g3-6yX0Xjh2s44LBS4RmasZ7OuNZrJIM8KYh40=w260",
     "availableStock": 5000,
-    "fileType": "PDF",
-    "fileSize": "9.2 MB"
   },
   {
     "id": "mat-018",
@@ -197,8 +163,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1QifixUpL5JJZyjVY8sCoNh0lOX6e4SLEviFFzRmnrctYrRHEeK6crdLL0TPdgoV0KlF4GhCpvnYa2kV_s7IgCn-_35IDWo13fjbekKnZALvMdbMxLsccqMMaJk2ZQgNA-oeB9S9gkOXaNbB-XBWvfb4AZc2iUqKolpqRnbKgKkeR71G08i7cq9QFiWMlhIiPkxxxDiDqqKdejbEUT_Jjq0CYvxnSuLWWnjLvk_XXCTw=w260",
     "availableStock": 5000,
-    "fileType": "PDF",
-    "fileSize": "9.6 MB"
   },
   {
     "id": "mat-019",
@@ -208,8 +172,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1Qifj2RgwO3QVbURsH2CHKOnDg4sEXLs6Ace_vhms017jAgLHHNjFJmv4zQrjI9wTFpacqFUzKTQ0oQkrkrecv0fLqHaKlwNCZiYCZa9Cikod-Y2VJBPItCbjbISOT0N6kafk32zFPTNrTsvq_BO25yM5bjoNhf6FJUwBDFEBQ-jBnu7lP2d3iCENaG9EgqAXaFdqAKDfNrPNUw3vt6bR0ImFmyyB7woFhupROVFc=w260",
     "availableStock": 3500,
-    "fileType": "PDF",
-    "fileSize": "16.2 MB"
   },
   {
     "id": "mat-020",
@@ -219,8 +181,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1Qifhd1y47vLkrGL6QbJLac6usIIKf25su4YrVo33qMWm_jfHgHu09_I6U8CAFqBRnWIMKEevHiVuoPlCjkdvC4jSVXdl5zYSAhiP0bnnmNAt5gBvxbtxvPF0XiC0_r9WE1dk0QyB1gvHRBUF61RpV2CIHqb0ntP2kHkOTK5_f5o-il0tOLwhTI6Vz1PLlJxAA-XMfSbtHNF8oeZM72fxggv5xECHSzzFB5ZCKit7KUg=w260",
     "availableStock": 3500,
-    "fileType": "PDF",
-    "fileSize": "16.5 MB"
   },
   {
     "id": "mat-021",
@@ -230,8 +190,6 @@ export const INITIAL_MEDIA_MATERIALS: MediaMaterial[] = [
     "maxAllowed": 50,
     "imageUrl": "https://docs.google.com/forms-images-rt/AI1Qifji7lm_U-WcYkc8Jq5xjyIRjix1aWctMP63FUyZOomlAEwIfZAwtJD_cl470kVxRxRdIZ79q9CVW2GpKudJYpQgp56e4IUIF9pKcJQVjQ2m2MeNaCravFtkkKB0AnRsC2ke6bjJo225ojOl-lVmMYtll4hSsZJkgjQcO6uI7FLkK3QJoqdx9rtA-Bca9tj4Zl_Vr0nujtiMfKnYRRGs2QGTGXqjwpDjOdAAS0r0EQ=w260",
     "availableStock": 1200,
-    "fileType": "PDF",
-    "fileSize": "28.4 MB"
   }
 ];
 
