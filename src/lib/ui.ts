@@ -49,4 +49,10 @@ export function pill(active: boolean): React.CSSProperties {
 
 export const THAI_MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 
+/** จัดรูปแบบวันเวลาไทยแบบย่อ เช่น "22 ก.ค. 09:14" (ใช้แสดงเวลายื่นคำขอ) */
+export function formatThaiDateTime(d: Date): string {
+  const p = (x: number) => String(x).padStart(2, '0');
+  return `${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
 export const STATUSES = ['รอการอนุมัติ', 'กำลังจัดส่ง', 'เสร็จสิ้น'] as const;

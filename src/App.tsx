@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { SYSTEMS } from './data/systems';
-import { INITIAL_MEDIA_MATERIALS, SEED_REQUESTS } from './data/mediaCatalog';
-import { MediaMaterial, SubmittedRequest } from './types';
+import { MediaMaterial, SubmittedRequest, SystemItem, MediaRequestForm } from './types';
+import * as api from './data/api';
 import {
   AppVM, CatalogItemVM, CategoryVM, SelectedVM, SystemVM, StepVM,
   ReqCardVM, BoStatVM, BoRequestVM, BoCatalogVM, MediaDraft, RequestFormState,
 } from './vm';
-import { css, fbFor, statusMeta, pill, THAI_MONTHS, STATUSES } from './lib/ui';
+import { css, fbFor, statusMeta, pill, STATUSES } from './lib/ui';
 import { Portal } from './components/Portal';
 import { Backoffice } from './components/Backoffice';
 import { RequestWizard } from './components/RequestWizard';
@@ -15,7 +14,6 @@ import { Toast } from './components/Toast';
 
 // ตัวเลือกเริ่มต้น (เทียบเท่า data-props ของดีไซน์)
 const DEFAULT_VIEW: 'portal' | 'backoffice' = 'portal';
-const SHOW_SAMPLE_DATA = true;
 
 function blankDraft(): MediaDraft {
   return { id: null, title: '', category: 'แผ่นพับ (Brochure)', description: '', maxAllowed: 50, availableStock: 1000, fileType: 'PDF', fileSize: '12.5 MB', imageUrl: '' };
@@ -30,7 +28,9 @@ interface State {
   cat: string;
   catalog: MediaMaterial[];
   requests: SubmittedRequest[];
+  systems: SystemItem[];
   myIds: string[];
+  loading: boolean;
   qtys: Record<string, number>;
   wizardOpen: boolean;
   step: number;
@@ -51,9 +51,11 @@ export default function App() {
     clock: '--:--:--',
     search: '',
     cat: 'ทั้งหมด',
-    catalog: INITIAL_MEDIA_MATERIALS,
-    requests: SHOW_SAMPLE_DATA ? SEED_REQUESTS : [],
-    myIds: SHOW_SAMPLE_DATA ? ['req-1'] : [],
+    catalog: [],
+    requests: [],
+    systems: [],
+    myIds: [],
+    loading: true,
     qtys: {},
     wizardOpen: false,
     step: 1,
@@ -72,6 +74,16 @@ export default function App() {
   const patch = useCallback((p: Partial<State> | ((s: State) => Partial<State>)) => {
     setSt(s => ({ ...s, ...(typeof p === 'function' ? p(s) : p) }));
   }, []);
+
+  // โหลด/รีเฟรชข้อมูลจาก data layer (localStorage วันนี้ → Supabase ภายหลัง)
+  const reload = useCallback(async () => {
+    const [catalog, systems, requests] = await Promise.all([
+      api.fetchCatalog(), api.fetchSystems(), api.fetchRequests(),
+    ]);
+    patch({ catalog, systems, requests, myIds: api.getMyTokens(), loading: false });
+  }, [patch]);
+
+  useEffect(() => { void reload(); }, [reload]);
 
   // นาฬิกา (clock)
   useEffect(() => {
@@ -94,8 +106,20 @@ export default function App() {
   }, []);
   useEffect(() => () => clearTimeout(toastTimer.current), []);
 
-  const download = useCallback((mat: MediaMaterial) => {
-    flash(`กำลังดาวน์โหลด "${mat.title.slice(0, 28)}..."`);
+  const download = useCallback(async (mat: MediaMaterial) => {
+    const url = await api.getDownloadUrl(mat);
+    if (url) {
+      flash(`กำลังดาวน์โหลด "${mat.title.slice(0, 28)}..."`);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } else {
+      flash('ยังไม่มีไฟล์ให้ดาวน์โหลดสำหรับสื่อนี้');
+    }
   }, [flash]);
 
   const toggle = useCallback((id: string) => {
@@ -129,84 +153,82 @@ export default function App() {
   const startRequest = useCallback(() => patch({ wizardOpen: true, step: 1, err: '', success: null }), [patch]);
   const closeWizard = useCallback(() => patch({ wizardOpen: false, step: 1, success: null, err: '' }), [patch]);
 
+  // step 3 → ยืนยันส่งคำขอ (ผ่าน data layer: สร้างเลขอ้างอิง + ตัด stock)
+  const doSubmit = useCallback(async () => {
+    const f = st.form;
+    const payload: MediaRequestForm = {
+      fullName: f.fullName.trim(), agencyName: f.agency.trim(), phoneNumber: f.phone.trim(),
+      requiredDate: f.date, shippingAddress: f.address.trim(), purpose: f.purpose.trim(),
+      selectedMaterials: Object.keys(st.qtys).map(id => ({ materialId: id, quantity: st.qtys[id] })),
+    };
+    try {
+      const req = await api.submitRequest(payload);
+      patch({ success: req, qtys: {}, form: EMPTY_FORM, err: '' });
+      await reload();
+    } catch (e) {
+      patch({ err: e instanceof Error ? e.message : 'ส่งคำขอไม่สำเร็จ กรุณาลองใหม่' });
+    }
+  }, [st.form, st.qtys, patch, reload]);
+
   const next = useCallback(() => {
-    setSt(s => {
-      if (s.step === 1) {
-        if (Object.keys(s.qtys).length === 0) return { ...s, err: 'กรุณาเลือกสื่ออย่างน้อย 1 รายการ' };
-        return { ...s, step: 2, err: '' };
-      }
-      if (s.step === 2) {
-        const f = s.form;
-        if (!f.fullName.trim()) return { ...s, err: 'กรุณากรอกชื่อ-สกุลผู้ขอ' };
-        if (!f.agency.trim()) return { ...s, err: 'กรุณากรอกชื่อหน่วยงาน' };
-        if (!f.phone.trim()) return { ...s, err: 'กรุณากรอกหมายเลขโทรศัพท์' };
-        if (!f.date) return { ...s, err: 'กรุณาเลือกวันที่ต้องการใช้สื่อ' };
-        if (!f.address.trim()) return { ...s, err: 'กรุณากรอกที่อยู่จัดส่ง' };
-        if (!f.purpose.trim()) return { ...s, err: 'กรุณาระบุวัตถุประสงค์' };
-        return { ...s, step: 3, err: '' };
-      }
-      // step 3 → ยืนยันส่งคำขอ
-      const f = s.form;
-      const ref = `ALC-2569-${Math.floor(1000 + Math.random() * 9000)}`;
-      const n = new Date();
-      const p = (x: number) => String(x).padStart(2, '0');
-      const req: SubmittedRequest = {
-        id: `req-${Date.now()}`, refNumber: ref,
-        submittedAt: `${n.getDate()} ${THAI_MONTHS[n.getMonth()]} ${p(n.getHours())}:${p(n.getMinutes())}`,
-        fullName: f.fullName.trim(), agencyName: f.agency.trim(), phoneNumber: f.phone.trim(),
-        requiredDate: f.date, shippingAddress: f.address.trim(), purpose: f.purpose.trim(),
-        selectedMaterials: Object.keys(s.qtys).map(id => ({ materialId: id, quantity: s.qtys[id] })),
-        status: 'รอการอนุมัติ',
-      };
-      return {
-        ...s,
-        requests: [req, ...s.requests],
-        myIds: [req.id, ...s.myIds],
-        success: req,
-        qtys: {},
-        form: EMPTY_FORM,
-      };
-    });
-  }, []);
+    if (st.step === 1) {
+      if (Object.keys(st.qtys).length === 0) { patch({ err: 'กรุณาเลือกสื่ออย่างน้อย 1 รายการ' }); return; }
+      patch({ step: 2, err: '' });
+      return;
+    }
+    if (st.step === 2) {
+      const f = st.form;
+      if (!f.fullName.trim()) { patch({ err: 'กรุณากรอกชื่อ-สกุลผู้ขอ' }); return; }
+      if (!f.agency.trim()) { patch({ err: 'กรุณากรอกชื่อหน่วยงาน' }); return; }
+      if (!f.phone.trim()) { patch({ err: 'กรุณากรอกหมายเลขโทรศัพท์' }); return; }
+      if (!f.date) { patch({ err: 'กรุณาเลือกวันที่ต้องการใช้สื่อ' }); return; }
+      if (!f.address.trim()) { patch({ err: 'กรุณากรอกที่อยู่จัดส่ง' }); return; }
+      if (!f.purpose.trim()) { patch({ err: 'กรุณาระบุวัตถุประสงค์' }); return; }
+      patch({ step: 3, err: '' });
+      return;
+    }
+    void doSubmit();
+  }, [st.step, st.qtys, st.form, patch, doSubmit]);
 
   const back = useCallback(() => patch(s => ({ step: Math.max(1, s.step - 1), err: '' })), [patch]);
   const setForm = useCallback((k: keyof RequestFormState, v: string) => patch(s => ({ form: { ...s.form, [k]: v } })), [patch]);
 
-  const setStatus = useCallback((id: string, status: string) => {
+  const setStatus = useCallback(async (id: string, status: string) => {
+    // optimistic update แล้วค่อย persist ผ่าน data layer
     patch(s => ({ requests: s.requests.map(r => r.id === id ? { ...r, status: status as SubmittedRequest['status'] } : r) }));
+    await api.setRequestStatus(id, status as SubmittedRequest['status']);
   }, [patch]);
-  const deleteMedia = useCallback((id: string) => patch(s => ({ catalog: s.catalog.filter(m => m.id !== id) })), [patch]);
+  const deleteMedia = useCallback(async (id: string) => {
+    await api.archiveMaterial(id);
+    await reload();
+  }, [reload]);
   const openAdd = useCallback(() => patch({ boAddOpen: true, boAddMode: 'add', draft: blankDraft() }), [patch]);
   const openEdit = useCallback((m: MediaMaterial) => patch({ boAddOpen: true, boAddMode: 'edit', draft: { ...blankDraft(), ...m, id: m.id } }), [patch]);
   const setDraft = useCallback((k: keyof MediaDraft, v: string) => patch(s => ({ draft: { ...s.draft, [k]: v } })), [patch]);
 
-  const saveDraft = useCallback(() => {
-    setSt(s => {
-      const d = s.draft;
-      if (!d.title.trim() || !d.description.trim()) {
-        flash('กรุณากรอกชื่อสื่อและคำอธิบาย');
-        return s;
-      }
-      const img = d.imageUrl.trim() || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
-      if (s.boAddMode === 'edit') {
-        flash('บันทึกการแก้ไขเรียบร้อย');
-        return {
-          ...s,
-          catalog: s.catalog.map(m => m.id === d.id ? { ...(d as unknown as MediaMaterial), imageUrl: img } : m),
-          boAddOpen: false,
-        };
-      }
-      const item: MediaMaterial = {
-        ...(d as unknown as MediaMaterial),
-        id: `mat-${Date.now()}`,
-        imageUrl: img,
-        maxAllowed: Number(d.maxAllowed) || 50,
-        availableStock: Number(d.availableStock) || 1000,
-      };
-      flash('เพิ่มสื่อใหม่เรียบร้อย');
-      return { ...s, catalog: [item, ...s.catalog], boAddOpen: false };
-    });
-  }, [flash]);
+  const saveDraft = useCallback(async () => {
+    const d = st.draft;
+    if (!d.title.trim() || !d.description.trim()) {
+      flash('กรุณากรอกชื่อสื่อและคำอธิบาย');
+      return;
+    }
+    const mode = st.boAddMode;
+    const mat: MediaMaterial = {
+      id: d.id ?? '',
+      title: d.title.trim(),
+      category: d.category,
+      description: d.description.trim(),
+      maxAllowed: Number(d.maxAllowed) || 50,
+      availableStock: Number(d.availableStock) || 1000,
+      imageUrl: d.imageUrl.trim() || undefined,
+      fileType: d.fileType,
+      fileSize: d.fileSize,
+    };
+    await api.saveMaterial(mat, mode);
+    patch({ boAddOpen: false });
+    await reload();
+    flash(mode === 'edit' ? 'บันทึกการแก้ไขเรียบร้อย' : 'เพิ่มสื่อใหม่เรียบร้อย');
+  }, [st.draft, st.boAddMode, patch, reload, flash]);
 
   // ====== reqCard helper ======
   const reqCard = useCallback((r: SubmittedRequest, catalog: MediaMaterial[]): ReqCardVM => {
@@ -274,7 +296,7 @@ export default function App() {
     });
     const selNames = selMats.map(m => m.title.replace(/".*?"/g, '').trim() || m.category).join(' · ');
 
-    const systemsVM: SystemVM[] = SYSTEMS.map(x => ({ ...x, target: x.url.startsWith('#') ? '_self' : '_blank' }));
+    const systemsVM: SystemVM[] = st.systems.map(x => ({ ...x, target: x.url.startsWith('#') ? '_self' : '_blank' }));
 
     const stepLabels = ['เลือกสื่อ', 'ข้อมูลจัดส่ง', 'ยืนยัน'];
     const steps: StepVM[] = stepLabels.map((label, i) => {
