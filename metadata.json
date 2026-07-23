@@ -1,0 +1,6 @@
+{
+  "name": "ระบบขอสนับสนุนสื่อประชาสัมพันธ์และศูนย์รวมระบบ - สคอ.",
+  "description": "ระบบขอสนับสนุนสื่อประชาสัมพันธ์และศูนย์รวมระบบสารสนเทศ สำนักงานคณะกรรมการควบคุมเครื่องดื่มแอลกอฮอล์",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

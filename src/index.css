@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #111827;
+    background-color: #ffffff;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Kanit', sans-serif;
+  }
+}
+
+.font-kanit {
+  font-family: 'Kanit', sans-serif;
+}
+
+.font-thai {
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+}
+
+.font-mono-num {
+  font-family: 'Space Mono', monospace;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom background floating lights */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, -20px) scale(1.08);
+  }
+}
+
+@keyframes floatSlowReverse {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-25px, 25px) scale(0.95);
+  }
+}
+
+@keyframes emblemPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+.animate-float-1 {
+  animation: floatSlow 12s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: floatSlowReverse 15s ease-in-out infinite;
+}
+
+.animate-emblem {
+  animation: emblemPulse 4s ease-in-out infinite;
+}
