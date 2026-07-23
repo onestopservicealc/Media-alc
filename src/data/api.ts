@@ -1,6 +1,4 @@
 import { MediaMaterial, SubmittedRequest, SystemItem, MediaRequestForm } from '../types';
-import { INITIAL_MEDIA_MATERIALS, SEED_REQUESTS } from './mediaCatalog';
-import { SYSTEMS } from './systems';
 import { formatThaiDateTime } from '../lib/ui';
 
 /* =========================================================================
@@ -24,13 +22,14 @@ import { formatThaiDateTime } from '../lib/ui';
      getDownloadUrl      → Storage.createSignedUrl(download_path)
    ========================================================================= */
 
+// ระบบเริ่มต้นแบบว่าง (ไม่มีการ seed ข้อมูลตัวอย่าง)
+// เปลี่ยน version key เป็น v2 → localStorage ชุดเดิม (v1) ถูกละทิ้งทุกเครื่อง
 const KEYS = {
-  catalog: 'alc.catalog.v1',
-  requests: 'alc.requests.v1',
-  systems: 'alc.systems.v1',
-  myTokens: 'alc.myTokens.v1', // id ของคำขอที่ยื่นจากเครื่องนี้ (แทน tracking token)
-  refSeq: 'alc.refSeq.v1',
-  seeded: 'alc.seeded.v1',
+  catalog: 'alc.catalog.v2',
+  requests: 'alc.requests.v2',
+  systems: 'alc.systems.v2',
+  myTokens: 'alc.myTokens.v2', // id ของคำขอที่ยื่นจากเครื่องนี้ (แทน tracking token)
+  refSeq: 'alc.refSeq.v2',
 };
 
 function read<T>(key: string, fallback: T): T {
@@ -46,15 +45,6 @@ function write<T>(key: string, value: T): void {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-/** เติมข้อมูลตั้งต้นครั้งแรกจากไฟล์ seed เดิม (idempotent) */
-function ensureSeeded(): void {
-  if (read(KEYS.seeded, false)) return;
-  write(KEYS.catalog, INITIAL_MEDIA_MATERIALS);
-  write(KEYS.requests, SEED_REQUESTS);
-  write(KEYS.systems, SYSTEMS);
-  write(KEYS.seeded, true);
-}
-
 /** จำลอง latency เล็กน้อยให้ flow แบบ async เหมือนเรียก network จริง */
 function delay<T>(value: T): Promise<T> {
   return new Promise(resolve => setTimeout(() => resolve(value), 40));
@@ -63,23 +53,19 @@ function delay<T>(value: T): Promise<T> {
 // ---------------------------------------------------------------- reads
 
 export async function fetchCatalog(): Promise<MediaMaterial[]> {
-  ensureSeeded();
   return delay(read<MediaMaterial[]>(KEYS.catalog, []));
 }
 
 export async function fetchSystems(): Promise<SystemItem[]> {
-  ensureSeeded();
   return delay(read<SystemItem[]>(KEYS.systems, []));
 }
 
 export async function fetchRequests(): Promise<SubmittedRequest[]> {
-  ensureSeeded();
   return delay(read<SubmittedRequest[]>(KEYS.requests, []));
 }
 
 /** คำขอที่ยื่นจากเครื่องนี้ (ติดตามผ่าน token ที่เก็บใน localStorage) */
 export async function getMyRequests(): Promise<SubmittedRequest[]> {
-  ensureSeeded();
   const tokens = read<string[]>(KEYS.myTokens, []);
   const all = read<SubmittedRequest[]>(KEYS.requests, []);
   return delay(all.filter(r => tokens.includes(r.id)));
@@ -105,7 +91,6 @@ function nextRefNumber(): string {
  * (บน Supabase = rpc('submit_request') ที่ทำในทรานแซกชันเดียว)
  */
 export async function submitRequest(form: MediaRequestForm): Promise<SubmittedRequest> {
-  ensureSeeded();
   const catalog = read<MediaMaterial[]>(KEYS.catalog, []);
 
   // ตรวจ stock ก่อนตัด — ถ้าไม่พอ ยกเลิกทั้งคำขอ
