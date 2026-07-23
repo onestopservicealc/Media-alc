@@ -151,3 +151,22 @@ export async function archiveMaterial(id: string): Promise<void> {
 export async function getDownloadUrl(mat: MediaMaterial): Promise<string | null> {
   return delay(mat.downloadUrl ?? null);
 }
+
+/**
+ * อัปโหลดรูปพรีวิว แล้วคืน URL ของรูป
+ * -----------------------------------------------------------------------------
+ * เฟสนี้: แปลงไฟล์เป็น data URL (base64) เก็บฝังใน localStorage ได้เลย
+ * ตอนต่อ Supabase: เปลี่ยนเป็น upload เข้า bucket 'media-previews'
+ *   แล้ว return getPublicUrl(path) — โดย signature เดิมไม่เปลี่ยน
+ */
+export async function uploadImage(file: File): Promise<string> {
+  if (!file.type.startsWith('image/')) throw new Error('กรุณาเลือกไฟล์รูปภาพ (jpg/png/webp)');
+  const MAX_BYTES = 2 * 1024 * 1024;
+  if (file.size > MAX_BYTES) throw new Error('ไฟล์รูปต้องไม่เกิน 2 MB');
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error('อ่านไฟล์รูปไม่สำเร็จ'));
+    reader.readAsDataURL(file);
+  });
+}

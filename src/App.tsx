@@ -205,6 +205,14 @@ export default function App() {
   const openAdd = useCallback(() => patch({ boAddOpen: true, boAddMode: 'add', draft: blankDraft() }), [patch]);
   const openEdit = useCallback((m: MediaMaterial) => patch({ boAddOpen: true, boAddMode: 'edit', draft: { ...blankDraft(), ...m, id: m.id } }), [patch]);
   const setDraft = useCallback((k: keyof MediaDraft, v: string) => patch(s => ({ draft: { ...s.draft, [k]: v } })), [patch]);
+  const uploadDraftImage = useCallback(async (file: File) => {
+    try {
+      const url = await api.uploadImage(file);
+      patch(s => ({ draft: { ...s.draft, imageUrl: url } }));
+    } catch (e) {
+      flash(e instanceof Error ? e.message : 'อัปโหลดรูปไม่สำเร็จ');
+    }
+  }, [patch, flash]);
 
   const saveDraft = useCallback(async () => {
     const d = st.draft;
@@ -398,12 +406,13 @@ export default function App() {
       onBoTab: (t: 'requests' | 'catalog') => patch({ boTab: t }),
       onToggleAdd: () => (st.boAddOpen ? patch({ boAddOpen: false }) : openAdd()),
       onDraftField: (k: keyof MediaDraft, v: string) => setDraft(k, v),
+      onUploadDraftImage: uploadDraftImage,
       onSaveDraft: saveDraft,
 
       onImgErr,
       toast: st.toast,
     };
-  }, [st, patch, download, toggle, bump, setQty, startRequest, next, back, closeWizard, setForm, reqCard, setStatus, openEdit, deleteMedia, openAdd, setDraft, saveDraft]);
+  }, [st, patch, download, toggle, bump, setQty, startRequest, next, back, closeWizard, setForm, reqCard, setStatus, openEdit, deleteMedia, openAdd, setDraft, uploadDraftImage, saveDraft]);
 
   return (
     <>

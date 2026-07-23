@@ -165,8 +165,22 @@ export function Backoffice({ vm }: { vm: AppVM }) {
                   </div>
                 </div>
                 <div style={S('margin-top:14px')}>
-                  <label style={S('display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px')}>ลิงก์รูปตัวอย่าง (ไม่บังคับ)</label>
-                  <input type="url" value={d.imageUrl} onChange={e => vm.onDraftField('imageUrl', e.target.value)} placeholder="https://.../preview.jpg" style={S('width:100%;padding:10px 13px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:11px;font-size:13px;outline:none')} />
+                  <label style={S('display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px')}>รูปตัวอย่าง (ไม่บังคับ · ไฟล์ภาพ ≤ 2 MB)</label>
+                  <div style={S('display:flex;align-items:center;gap:12px;flex-wrap:wrap')}>
+                    {d.imageUrl && (
+                      <div style={S('position:relative;width:72px;height:72px;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;flex-shrink:0;background:#f1f2f4')}>
+                        <img src={d.imageUrl} alt="ตัวอย่าง" onError={vm.onImgErr} style={S('width:100%;height:100%;object-fit:cover')} />
+                      </div>
+                    )}
+                    <label style={S("display:inline-flex;align-items:center;gap:7px;padding:10px 16px;background:#fff;color:#374151;border:1px dashed #cbd0d6;border-radius:11px;font-family:'Kanit';font-weight:500;font-size:13px;cursor:pointer")}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+                      <span>{d.imageUrl ? 'เปลี่ยนรูป' : 'อัปโหลดรูป'}</span>
+                      <input type="file" accept="image/*" style={S('display:none')} onChange={e => { const f = e.target.files?.[0]; if (f) vm.onUploadDraftImage(f); e.target.value = ''; }} />
+                    </label>
+                    {d.imageUrl && (
+                      <button type="button" onClick={() => vm.onDraftField('imageUrl', '')} style={S("padding:9px 14px;background:#fef2f2;color:#e8112d;border:none;border-radius:11px;font-family:'Kanit';font-weight:500;font-size:12.5px;cursor:pointer")}>ลบรูป</button>
+                    )}
+                  </div>
                 </div>
                 <div style={S('display:flex;justify-content:flex-end;gap:10px;margin-top:18px')}>
                   <button onClick={vm.onToggleAdd} style={S("padding:10px 20px;background:#f1f2f4;color:#374151;border:none;border-radius:999px;font-family:'Kanit';font-size:13.5px;cursor:pointer")}>ยกเลิก</button>

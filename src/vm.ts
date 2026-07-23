@@ -172,6 +172,7 @@ export interface AppVM {
   onBoTab: (t: 'requests' | 'catalog') => void;
   onToggleAdd: () => void;
   onDraftField: (k: keyof MediaDraft, v: string) => void;
+  onUploadDraftImage: (file: File) => void;
   onSaveDraft: () => void;
 
   onImgErr: (e: React.SyntheticEvent<HTMLImageElement>) => void;
