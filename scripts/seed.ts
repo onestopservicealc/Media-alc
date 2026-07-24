@@ -21,8 +21,8 @@ const db = createClient(url, key, { auth: { persistSession: false } });
 
 // >>> แก้รายชื่ออีเมลแอดมินที่อนุญาตให้เข้า Backoffice ที่นี่ <<<
 const ADMIN_EMAILS = [
-  'webex.alc@ddc.mail.go.th',
-  // 'someone.else@ddc.mail.go.th',
+  'onestopservicealc@gmail.com',
+  // 'someone.else@example.com',
 ];
 
 async function main() {
