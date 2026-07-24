@@ -39,7 +39,18 @@ export function HistoryModal({ vm }: { vm: AppVM }) {
                   <div><span style={S('color:#9ca3af')}>หน่วยงาน:</span> <strong>{r.agencyName}</strong></div>
                   <div><span style={S('color:#9ca3af')}>วันที่ใช้:</span> <strong>{r.requiredDate}</strong></div>
                 </div>
-                <div style={S('margin-top:12px;font-size:12.5px;color:#6b7280')}>{r.itemsSummary}</div>
+                <div style={S('margin-top:12px;display:flex;flex-direction:column;gap:7px')}>
+                  {r.items.map(it => (
+                    <div key={it.materialId} style={S('display:flex;align-items:center;gap:10px')}>
+                      <div onClick={() => it.imageUrl && vm.onOpenLightbox(it.imageUrl)} style={{ ...S('position:relative;width:40px;height:40px;border-radius:9px;overflow:hidden;background:#f1f2f4;flex-shrink:0'), cursor: it.imageUrl ? 'zoom-in' : 'default' }}>
+                        <div style={it.fbStyleSm}>{it.catShort}</div>
+                        <img src={it.imageUrl} alt={it.title} referrerPolicy="no-referrer" onError={vm.onImgErr} style={S('position:absolute;inset:0;width:100%;height:100%;object-fit:cover')} />
+                      </div>
+                      <span style={S("flex:1;min-width:0;font-size:12.5px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap")}>{it.title}</span>
+                      <span style={S("font-family:'Space Mono';font-weight:700;font-size:12px;color:#e8112d;flex-shrink:0")}>×{it.quantity}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>

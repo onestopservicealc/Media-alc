@@ -47,12 +47,20 @@ export interface StepVM {
   bar: React.CSSProperties;
 }
 
+export interface ReqItemVM {
+  materialId: string;
+  title: string;
+  quantity: number;
+  imageUrl?: string;
+  catShort: string;
+  fbStyleSm: React.CSSProperties;
+}
+
 export interface ReqCardVM extends SubmittedRequest {
   statusStyle: React.CSSProperties;
   statusDot: React.CSSProperties;
-  itemsSummary: string;
   itemsTotal: number;
-  itemsNames: string;
+  items: ReqItemVM[];
 }
 
 export interface BoStatVM {
@@ -171,4 +179,8 @@ export interface AppVM {
 
   onImgErr: (e: React.SyntheticEvent<HTMLImageElement>) => void;
   toast: string;
+
+  lightbox: string | null;
+  onOpenLightbox: (url: string) => void;
+  onCloseLightbox: () => void;
 }

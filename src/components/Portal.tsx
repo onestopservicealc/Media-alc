@@ -132,13 +132,19 @@ export function Portal({ vm }: { vm: AppVM }) {
               <div style={S('display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px')}>
                 {vm.catalogVM.map(m => (
                   <div key={m.id} style={m.wrapStyle}>
-                    <div style={S('position:relative;height:150px;border-radius:16px;overflow:hidden;background:#f1f2f4;margin-bottom:14px')}>
+                    <div onClick={() => m.imageUrl && vm.onOpenLightbox(m.imageUrl)} style={{ ...S('position:relative;height:200px;border-radius:16px;overflow:hidden;background:#f1f2f4;margin-bottom:14px'), cursor: m.imageUrl ? 'zoom-in' : 'default' }}>
                       <div style={m.fbStyle}>
                         <ImgFallbackIcon size={30} />
                         <span style={S("font-family:'Kanit';font-weight:600;font-size:12.5px;line-height:1.35")}>{m.catShort}</span>
                       </div>
                       <img src={m.imageUrl} alt={m.title} referrerPolicy="no-referrer" onError={vm.onImgErr} style={S('position:absolute;inset:0;width:100%;height:100%;object-fit:cover')} />
                       <span style={S("position:absolute;top:12px;left:12px;font-size:11px;font-weight:600;padding:4px 11px;border-radius:999px;background:rgba(255,255,255,.94);color:#374151;font-family:'Kanit';z-index:2")}>{m.category}</span>
+                      {m.imageUrl && (
+                        <span style={S("position:absolute;bottom:12px;right:12px;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(17,20,27,.72);color:#fff;font-family:'Kanit';z-index:2")}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
+                          <span>ดูภาพเต็ม</span>
+                        </span>
+                      )}
                     </div>
                     <h3 style={S("margin:0 0 6px;font-family:'Kanit';font-weight:600;font-size:15.5px;line-height:1.4;min-height:44px")}>{m.title}</h3>
                     <p style={S('margin:0 0 14px;font-size:12.5px;color:#6b7280;line-height:1.55;min-height:39px')}>{m.description}</p>

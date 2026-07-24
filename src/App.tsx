@@ -3,7 +3,7 @@ import { MediaMaterial, SubmittedRequest, SystemItem, MediaRequestForm } from '.
 import * as api from './data/api';
 import {
   AppVM, CatalogItemVM, CategoryVM, SelectedVM, SystemVM, StepVM,
-  ReqCardVM, BoStatVM, BoRequestVM, BoCatalogVM, MediaDraft, RequestFormState,
+  ReqCardVM, ReqItemVM, BoStatVM, BoRequestVM, BoCatalogVM, MediaDraft, RequestFormState,
 } from './vm';
 import { css, fbFor, statusMeta, pill, STATUSES } from './lib/ui';
 import { Portal } from './components/Portal';
@@ -11,6 +11,7 @@ import { Backoffice } from './components/Backoffice';
 import { RequestWizard } from './components/RequestWizard';
 import { HistoryModal } from './components/HistoryModal';
 import { Toast } from './components/Toast';
+import { Lightbox } from './components/Lightbox';
 
 // ตัวเลือกเริ่มต้น (เทียบเท่า data-props ของดีไซน์)
 const DEFAULT_VIEW: 'portal' | 'backoffice' = 'portal';
@@ -43,6 +44,7 @@ interface State {
   boAddOpen: boolean;
   boAddMode: 'add' | 'edit';
   draft: MediaDraft;
+  lightbox: string | null;
 }
 
 export default function App() {
@@ -68,6 +70,7 @@ export default function App() {
     boAddOpen: false,
     boAddMode: 'add',
     draft: blankDraft(),
+    lightbox: null,
   });
 
   // patch แบบเดียวกับ this.setState (รับ object หรือ updater function)
@@ -136,6 +139,9 @@ export default function App() {
 
   const startRequest = useCallback(() => patch({ wizardOpen: true, step: 1, err: '', success: null }), [patch]);
   const closeWizard = useCallback(() => patch({ wizardOpen: false, step: 1, success: null, err: '' }), [patch]);
+
+  const openLightbox = useCallback((url: string) => patch({ lightbox: url }), [patch]);
+  const closeLightbox = useCallback(() => patch({ lightbox: null }), [patch]);
 
   // step 3 → ยืนยันส่งคำขอ (ผ่าน data layer: สร้างเลขอ้างอิง + ตัด stock)
   const doSubmit = useCallback(async () => {
@@ -224,17 +230,24 @@ export default function App() {
   const reqCard = useCallback((r: SubmittedRequest, catalog: MediaMaterial[]): ReqCardVM => {
     const meta = statusMeta(r.status);
     const total = r.selectedMaterials.reduce((a, b) => a + b.quantity, 0);
-    const names = r.selectedMaterials.map(it => {
+    const items: ReqItemVM[] = r.selectedMaterials.map(it => {
       const m = catalog.find(x => x.id === it.materialId);
-      return `${m ? m.category.replace(/\s*\(.*?\)/, '') : it.materialId} ×${it.quantity}`;
-    }).join(', ');
+      const fb = fbFor(m?.category ?? '');
+      return {
+        materialId: it.materialId,
+        title: m ? m.title : 'สื่อถูกลบออกจากคลัง',
+        quantity: it.quantity,
+        imageUrl: m?.imageUrl,
+        catShort: fb.short || 'สื่อ',
+        fbStyleSm: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: fb.bg, color: fb.accent, fontFamily: 'Kanit', fontWeight: 600, fontSize: '10px', textAlign: 'center', padding: '0 5px', lineHeight: 1.2 },
+      };
+    });
     return {
       ...r,
       statusStyle: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 600, fontFamily: 'Kanit', color: meta.text, background: meta.bg, border: `1px solid ${meta.bd}` },
       statusDot: { width: '7px', height: '7px', borderRadius: '999px', background: meta.dot, display: 'inline-block' },
-      itemsSummary: `รวม ${total} ชิ้น — ${names}`,
       itemsTotal: total,
-      itemsNames: names,
+      items,
     };
   }, []);
 
@@ -390,8 +403,12 @@ export default function App() {
 
       onImgErr,
       toast: st.toast,
+
+      lightbox: st.lightbox,
+      onOpenLightbox: openLightbox,
+      onCloseLightbox: closeLightbox,
     };
-  }, [st, patch, toggle, bump, setQty, startRequest, next, back, closeWizard, setForm, reqCard, setStatus, openEdit, deleteMedia, openAdd, setDraft, uploadDraftImage, saveDraft]);
+  }, [st, patch, toggle, bump, setQty, startRequest, next, back, closeWizard, openLightbox, closeLightbox, setForm, reqCard, setStatus, openEdit, deleteMedia, openAdd, setDraft, uploadDraftImage, saveDraft]);
 
   return (
     <>
@@ -399,6 +416,7 @@ export default function App() {
       {vm.isBackoffice && <Backoffice vm={vm} />}
       {vm.wizardOpen && <RequestWizard vm={vm} />}
       {vm.historyOpen && <HistoryModal vm={vm} />}
+      {vm.lightbox && <Lightbox vm={vm} />}
       {vm.toast && <Toast msg={vm.toast} />}
     </>
   );

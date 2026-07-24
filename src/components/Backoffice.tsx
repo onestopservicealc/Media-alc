@@ -95,8 +95,20 @@ export function Backoffice({ vm }: { vm: AppVM }) {
                   <div style={S('display:flex;align-items:center;gap:7px')}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>ใช้ {r.requiredDate}</span></div>
                   <div style={S('display:flex;align-items:flex-start;gap:7px;grid-column:1/-1')}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={S('flex-shrink:0;margin-top:2px')}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg><span style={S('color:#6b7280')}>{r.shippingAddress}</span></div>
                 </div>
-                <div style={S('background:#f6f7f9;border-radius:12px;padding:11px 14px;font-size:12.5px;color:#374151;margin-bottom:14px')}>
-                  <strong style={S("font-family:'Kanit'")}>รายการสื่อ:</strong> {r.itemsSummary}
+                <div style={S('background:#f6f7f9;border-radius:14px;padding:12px 14px;margin-bottom:14px')}>
+                  <div style={S("font-size:12px;font-weight:600;color:#6b7280;font-family:'Kanit';margin-bottom:10px")}>รายการสื่อที่ขอ (รวม {r.itemsTotal} ชิ้น)</div>
+                  <div style={S('display:flex;flex-direction:column;gap:8px')}>
+                    {r.items.map(it => (
+                      <div key={it.materialId} style={S('display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #eceef1;border-radius:12px;padding:8px 12px')}>
+                        <div onClick={() => it.imageUrl && vm.onOpenLightbox(it.imageUrl)} style={{ ...S('position:relative;width:48px;height:48px;border-radius:10px;overflow:hidden;background:#f1f2f4;flex-shrink:0'), cursor: it.imageUrl ? 'zoom-in' : 'default' }}>
+                          <div style={it.fbStyleSm}>{it.catShort}</div>
+                          <img src={it.imageUrl} alt={it.title} referrerPolicy="no-referrer" onError={vm.onImgErr} style={S('position:absolute;inset:0;width:100%;height:100%;object-fit:cover')} />
+                        </div>
+                        <span style={S("flex:1;min-width:0;font-family:'Kanit';font-weight:500;font-size:13px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap")}>{it.title}</span>
+                        <span style={S("font-family:'Space Mono';font-weight:700;font-size:13px;color:#e8112d;background:#fef2f2;padding:3px 10px;border-radius:999px;flex-shrink:0")}>×{it.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div style={S('display:flex;align-items:center;gap:8px;flex-wrap:wrap')}>
                   <span style={S("font-size:12px;color:#9ca3af;font-family:'Kanit';margin-right:4px")}>อัปเดตสถานะ:</span>
