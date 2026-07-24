@@ -46,6 +46,18 @@ grant execute on function submit_request(jsonb)                    to authentica
 grant execute on function set_request_status(uuid, request_status) to authenticated;
 grant execute on function is_staff()                               to authenticated;
 
+-- ---------------------------------------------------------------- table privileges
+-- PostgREST ต้องมี GRANT ระดับตารางก่อน RLS ถึงจะทำงาน (RLS กรองแถวหลังจากนั้น)
+grant usage on schema public to anon, authenticated;
+grant select                     on public.media_materials to anon, authenticated;
+grant insert, update, delete     on public.media_materials to authenticated;
+grant select                     on public.systems         to anon, authenticated;
+grant insert, update, delete     on public.systems         to authenticated;
+grant select, update             on public.requests        to authenticated;
+grant select                     on public.request_items   to authenticated;
+-- staff: ไม่ grant — เข้าถึงผ่าน is_staff() (security definer) เท่านั้น
+-- requests/request_items insert: ผ่าน RPC submit_request (definer) จึงไม่ต้อง grant insert
+
 -- ---------------------------------------------------------------- Storage: bucket 'media-previews'
 -- (สร้าง bucket แบบ public ใน dashboard ก่อน) — จำกัดสิทธิ์ upload/แก้/ลบ ให้ staff
 create policy media_previews_public_read on storage.objects
