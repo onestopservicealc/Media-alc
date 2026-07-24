@@ -1,13 +1,16 @@
 /**
- * Seed สื่อ 21 รายการ + ลิงก์ระบบ 8 อัน จากไฟล์ข้อมูลเดิมเข้า Supabase
+ * Seed: รายชื่อเจ้าหน้าที่ (allowlist) + ลิงก์ระบบราชการ เข้า Supabase
  * -----------------------------------------------------------------------------
- * เตรียมไว้สำหรับตอนต่อ Supabase (ยังไม่ใช้ในเฟส localStorage)
- * ต้องติดตั้งก่อน:  npm i -D @supabase/supabase-js
- * รันด้วย:         SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npx tsx scripts/seed.ts
+ * ต้องติดตั้งก่อน:  npm i (มี @supabase/supabase-js แล้ว)
+ * รันด้วย:
+ *   SUPABASE_URL=https://xxxx.supabase.co \
+ *   SUPABASE_SERVICE_ROLE_KEY=... \
+ *   npx tsx scripts/seed.ts
  * ใช้ service-role key ฝั่ง local เท่านั้น — ห้าม commit / ห้าม ship
+ *
+ * แก้ ADMIN_EMAILS ให้เป็นอีเมล Google ของเจ้าหน้าที่จริงก่อนรัน
  */
 import { createClient } from '@supabase/supabase-js';
-import { INITIAL_MEDIA_MATERIALS } from '../src/data/mediaCatalog';
 import { SYSTEMS } from '../src/data/systems';
 
 const url = process.env.SUPABASE_URL;
@@ -16,19 +19,17 @@ if (!url || !key) throw new Error('ต้องตั้ง SUPABASE_URL แล�
 
 const db = createClient(url, key, { auth: { persistSession: false } });
 
+// >>> แก้รายชื่ออีเมลแอดมินที่อนุญาตให้เข้า Backoffice ที่นี่ <<<
+const ADMIN_EMAILS = [
+  'webex.alc@ddc.mail.go.th',
+  // 'someone.else@ddc.mail.go.th',
+];
+
 async function main() {
-  const materials = INITIAL_MEDIA_MATERIALS.map(m => ({
-    id: m.id,
-    title: m.title,
-    category: m.category,
-    description: m.description,
-    max_allowed: m.maxAllowed,
-    available_stock: m.availableStock ?? 0,
-    image_url: m.imageUrl ?? null,
-  }));
-  const { error: e1 } = await db.from('media_materials').upsert(materials, { onConflict: 'id' });
-  if (e1) throw e1;
-  console.log(`seeded ${materials.length} media_materials`);
+  const staff = ADMIN_EMAILS.map(email => ({ email, role: 'admin' }));
+  const { error: e0 } = await db.from('staff').upsert(staff, { onConflict: 'email' });
+  if (e0) throw e0;
+  console.log(`seeded ${staff.length} staff (allowlist)`);
 
   const systems = SYSTEMS.map((s, i) => ({
     name: s.name, url: s.url, description: s.desc, category: s.cat,

@@ -1,10 +1,25 @@
 -- =============================================================================
--- Media-alc — schema เริ่มต้น (เตรียมไว้สำหรับตอนต่อ Supabase)
--- ที่มา: src/types.ts  |  รันด้วย: supabase db push  หรือผ่าน SQL editor
+-- Media-alc — schema + auth model (Supabase)
+-- ที่มา: src/types.ts  |  รันใน Supabase SQL editor หรือ supabase db push
 -- =============================================================================
 
 -- สถานะคำขอ (คงค่าเป็นภาษาไทยเพื่อไม่ต้องแก้ src/lib/ui.ts และ logic เดิม)
 create type request_status as enum ('รอการอนุมัติ', 'กำลังจัดส่ง', 'เสร็จสิ้น');
+
+-- ---------------------------------------------------------------- staff (allowlist แอดมิน)
+-- เจ้าหน้าที่ = อีเมล Google ที่อยู่ในตารางนี้เท่านั้น (seed ด้วย scripts/seed.ts)
+create table staff (
+  email      text primary key,
+  role       text not null default 'admin',
+  created_at timestamptz not null default now()
+);
+
+-- ตรวจว่าผู้ใช้ที่ล็อกอินอยู่เป็นเจ้าหน้าที่หรือไม่ (อ่านอีเมลจาก JWT)
+-- security definer → เช็คได้โดยไม่ต้องเปิด SELECT ตาราง staff ให้ client
+create or replace function is_staff() returns boolean
+language sql security definer stable set search_path = public as $$
+  select exists (select 1 from staff where email = auth.jwt() ->> 'email');
+$$;
 
 -- ---------------------------------------------------------------- media_materials
 create table media_materials (
@@ -14,7 +29,7 @@ create table media_materials (
   description     text        not null,
   max_allowed     int         not null default 50 check (max_allowed between 1 and 50),
   available_stock int         not null default 0  check (available_stock >= 0),
-  image_url       text,                          -- URL รูปพรีวิว (public bucket 'media-previews')
+  image_url       text,                          -- public URL ของ bucket 'media-previews'
   is_archived     boolean     not null default false, -- soft delete
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
@@ -26,6 +41,7 @@ create sequence req_ref_seq start 4822;
 create table requests (
   id               uuid primary key default gen_random_uuid(),
   ref_number       text        unique not null,   -- ALC-{ปีพ.ศ.}-#### สร้างใน RPC
+  user_id          uuid        not null references auth.users(id) on delete cascade, -- เจ้าของคำขอ
   full_name        text        not null,
   agency_name      text        not null,
   phone_number     text        not null,
@@ -33,12 +49,11 @@ create table requests (
   shipping_address text        not null,
   purpose          text        not null,
   status           request_status not null default 'รอการอนุมัติ',
-  tracking_token   uuid        not null default gen_random_uuid(), -- "คำขอของฉัน" แบบไม่ต้อง login
   submitted_at     timestamptz not null default now(),
   updated_at       timestamptz not null default now()
 );
 create index requests_status_idx on requests (status);
-create index requests_token_idx  on requests (tracking_token);
+create index requests_user_idx   on requests (user_id);
 
 -- ---------------------------------------------------------------- request_items
 create table request_items (
@@ -71,21 +86,27 @@ create trigger requests_updated before update on requests
   for each row execute function set_updated_at();
 
 -- ---------------------------------------------------------------- RPC: ส่งคำขอ + ตัด stock (atomic)
+-- ผูกคำขอกับ user ที่ล็อกอิน (auth.uid()); ต้อง authenticated เท่านั้น
 create or replace function submit_request(payload jsonb)
-returns table (id uuid, ref_number text, tracking_token uuid, submitted_at timestamptz)
-language plpgsql security definer as $$
+returns table (id uuid, ref_number text, submitted_at timestamptz)
+language plpgsql security definer set search_path = public as $$
 declare
+  uid uuid := auth.uid();
   new_id uuid; new_ref text; item jsonb;
 begin
+  if uid is null then
+    raise exception 'AUTH_REQUIRED';
+  end if;
+
   new_ref := 'ALC-' || (extract(year from now())::int + 543)
              || '-' || lpad(nextval('req_ref_seq')::text, 4, '0');
 
-  insert into requests (ref_number, full_name, agency_name, phone_number,
+  insert into requests (ref_number, user_id, full_name, agency_name, phone_number,
                         required_date, shipping_address, purpose)
-  values (new_ref, payload->>'fullName', payload->>'agencyName', payload->>'phoneNumber',
+  values (new_ref, uid, payload->>'fullName', payload->>'agencyName', payload->>'phoneNumber',
           (payload->>'requiredDate')::date, payload->>'shippingAddress', payload->>'purpose')
-  returning requests.id, requests.tracking_token, requests.submitted_at
-    into new_id, submit_request.tracking_token, submit_request.submitted_at;
+  returning requests.id, requests.submitted_at
+    into new_id, submit_request.submitted_at;
 
   for item in select * from jsonb_array_elements(payload->'selectedMaterials') loop
     update media_materials
@@ -105,13 +126,10 @@ end $$;
 
 -- ---------------------------------------------------------------- RPC: เปลี่ยนสถานะ (staff เท่านั้น)
 create or replace function set_request_status(req_id uuid, new_status request_status)
-returns void language plpgsql security invoker as $$
+returns void language plpgsql security definer set search_path = public as $$
 begin
+  if not is_staff() then
+    raise exception 'FORBIDDEN';
+  end if;
   update requests set status = new_status where id = req_id;
 end $$;
-
--- ---------------------------------------------------------------- RPC: ดึงคำขอตาม token (anon)
-create or replace function get_requests_by_token(tokens uuid[])
-returns setof requests language sql security definer stable as $$
-  select * from requests where tracking_token = any(tokens) order by submitted_at desc;
-$$;

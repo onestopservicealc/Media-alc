@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MediaMaterial, SubmittedRequest, SystemItem, MediaRequestForm } from './types';
 import * as api from './data/api';
+import type { AuthUser } from './data/api';
 import {
   AppVM, CatalogItemVM, CategoryVM, SelectedVM, SystemVM, StepVM,
   ReqCardVM, ReqItemVM, BoStatVM, BoRequestVM, BoCatalogVM, MediaDraft, RequestFormState,
@@ -12,6 +13,7 @@ import { RequestWizard } from './components/RequestWizard';
 import { HistoryModal } from './components/HistoryModal';
 import { Toast } from './components/Toast';
 import { Lightbox } from './components/Lightbox';
+import { Login } from './components/Login';
 
 // ตัวเลือกเริ่มต้น (เทียบเท่า data-props ของดีไซน์)
 const DEFAULT_VIEW: 'portal' | 'backoffice' = 'portal';
@@ -30,8 +32,13 @@ interface State {
   catalog: MediaMaterial[];
   requests: SubmittedRequest[];
   systems: SystemItem[];
-  myIds: string[];
+  myRequests: SubmittedRequest[];
   loading: boolean;
+  user: AuthUser | null;
+  isStaff: boolean;
+  authReady: boolean;
+  loginOpen: boolean;
+  loginReason: 'backoffice' | 'submit' | 'generic' | null;
   qtys: Record<string, number>;
   wizardOpen: boolean;
   step: number;
@@ -56,8 +63,13 @@ export default function App() {
     catalog: [],
     requests: [],
     systems: [],
-    myIds: [],
+    myRequests: [],
     loading: true,
+    user: null,
+    isStaff: false,
+    authReady: false,
+    loginOpen: false,
+    loginReason: null,
     qtys: {},
     wizardOpen: false,
     step: 1,
@@ -78,15 +90,18 @@ export default function App() {
     setSt(s => ({ ...s, ...(typeof p === 'function' ? p(s) : p) }));
   }, []);
 
-  // โหลด/รีเฟรชข้อมูลจาก data layer (localStorage วันนี้ → Supabase ภายหลัง)
+  // โหลด/รีเฟรชข้อมูลจาก data layer (Supabase). RLS คุมสิทธิ์ให้เอง:
+  // fetchRequests คืนทั้งหมดเฉพาะ staff, getMyRequests คืนของผู้ล็อกอิน
   const reload = useCallback(async () => {
-    const [catalog, systems, requests] = await Promise.all([
-      api.fetchCatalog(), api.fetchSystems(), api.fetchRequests(),
+    // แต่ละคิวรีกันพังกันเอง (เช่น non-staff เรียก fetchRequests แล้ว RLS คืน [])
+    const [catalog, systems, requests, myRequests] = await Promise.all([
+      api.fetchCatalog().catch(() => []),
+      api.fetchSystems().catch(() => []),
+      api.fetchRequests().catch(() => []),
+      api.getMyRequests().catch(() => []),
     ]);
-    patch({ catalog, systems, requests, myIds: api.getMyTokens(), loading: false });
+    patch({ catalog, systems, requests, myRequests, loading: false });
   }, [patch]);
-
-  useEffect(() => { void reload(); }, [reload]);
 
   // นาฬิกา (clock)
   useEffect(() => {
@@ -108,6 +123,31 @@ export default function App() {
     toastTimer.current = setTimeout(() => setSt(s => ({ ...s, toast: '' })), 3200);
   }, []);
   useEffect(() => () => clearTimeout(toastTimer.current), []);
+
+  // ติดตามสถานะ auth (รวมถึง session ที่กลับมาจาก Google OAuth redirect)
+  useEffect(() => {
+    const unsub = api.onAuthChange(async (user) => {
+      const isStaff = user ? await api.checkIsStaff() : false;
+      // กู้คืนงานที่ค้างไว้ก่อน redirect ไป Google (เลือกสื่อ/กรอกฟอร์ม หรือจะเข้า Backoffice)
+      let restore: Partial<State> = {};
+      const raw = user ? sessionStorage.getItem('alc.pending') : null;
+      if (raw) {
+        sessionStorage.removeItem('alc.pending');
+        try {
+          const p = JSON.parse(raw) as { reason: string; qtys?: Record<string, number>; form?: RequestFormState };
+          if (p.reason === 'submit') {
+            restore = { qtys: p.qtys ?? {}, form: p.form ?? EMPTY_FORM, wizardOpen: true, step: 3, loginOpen: false };
+          } else if (p.reason === 'backoffice') {
+            if (isStaff) restore = { view: 'backoffice', loginOpen: false };
+            else flash('บัญชีนี้ไม่มีสิทธิ์เข้าถึงระบบเจ้าหน้าที่');
+          }
+        } catch { /* ignore */ }
+      }
+      patch({ user, isStaff, authReady: true, ...restore });
+      await reload();
+    });
+    return () => unsub();
+  }, [patch, reload, flash]);
 
   const toggle = useCallback((id: string) => {
     patch(s => {
@@ -143,8 +183,29 @@ export default function App() {
   const openLightbox = useCallback((url: string) => patch({ lightbox: url }), [patch]);
   const closeLightbox = useCallback(() => patch({ lightbox: null }), [patch]);
 
+  // ---- auth actions ----
+  const openLogin = useCallback((reason: 'backoffice' | 'submit' | 'generic') => patch({ loginOpen: true, loginReason: reason }), [patch]);
+  const closeLogin = useCallback(() => patch({ loginOpen: false, loginReason: null }), [patch]);
+  const login = useCallback(async () => {
+    // เก็บงานที่ค้างไว้ลง sessionStorage ก่อน redirect ไป Google แล้วกู้คืนตอนกลับมา
+    const pending = st.loginReason === 'submit'
+      ? { reason: 'submit', qtys: st.qtys, form: st.form }
+      : { reason: st.loginReason ?? 'generic' };
+    sessionStorage.setItem('alc.pending', JSON.stringify(pending));
+    try {
+      await api.signInWithGoogle();
+    } catch (e) {
+      flash(e instanceof Error ? e.message : 'เข้าสู่ระบบไม่สำเร็จ');
+    }
+  }, [st.loginReason, st.qtys, st.form, flash]);
+  const logout = useCallback(async () => {
+    await api.signOut();
+    patch({ view: 'portal' });
+  }, [patch]);
+
   // step 3 → ยืนยันส่งคำขอ (ผ่าน data layer: สร้างเลขอ้างอิง + ตัด stock)
   const doSubmit = useCallback(async () => {
+    if (!st.user) { patch({ loginOpen: true, loginReason: 'submit' }); return; }
     const f = st.form;
     const payload: MediaRequestForm = {
       fullName: f.fullName.trim(), agencyName: f.agency.trim(), phoneNumber: f.phone.trim(),
@@ -158,7 +219,7 @@ export default function App() {
     } catch (e) {
       patch({ err: e instanceof Error ? e.message : 'ส่งคำขอไม่สำเร็จ กรุณาลองใหม่' });
     }
-  }, [st.form, st.qtys, patch, reload]);
+  }, [st.user, st.form, st.qtys, patch, reload]);
 
   const next = useCallback(() => {
     if (st.step === 1) {
@@ -316,8 +377,7 @@ export default function App() {
     const backLabels: Record<number, string> = { 1: 'ยกเลิก', 2: 'ย้อนกลับ', 3: 'ย้อนกลับ' };
     const nextLabels: Record<number, string> = { 1: 'ถัดไป', 2: 'ตรวจทาน', 3: 'ยืนยันส่งคำขอ' };
 
-    const myRequests = st.requests.filter(r => st.myIds.includes(r.id));
-    const myRequestsVM = myRequests.map(r => reqCard(r, st.catalog));
+    const myRequestsVM = st.myRequests.map(r => reqCard(r, st.catalog));
 
     // backoffice
     const pending = st.requests.filter(r => r.status === 'รอการอนุมัติ').length;
@@ -366,7 +426,11 @@ export default function App() {
       selCount: selIds.length, selTotal, selNames, hasSelection: selIds.length > 0 && !st.wizardOpen,
       onSearch: (e: React.ChangeEvent<HTMLInputElement>) => patch({ search: e.target.value }),
       onClearFilters: () => patch({ search: '', cat: 'ทั้งหมด' }),
-      onGotoBO: () => patch({ view: 'backoffice' }),
+      onGotoBO: () => {
+        if (!st.user) { patch({ loginOpen: true, loginReason: 'backoffice' }); return; }
+        if (!st.isStaff) { flash('บัญชีนี้ไม่มีสิทธิ์เข้าถึงระบบเจ้าหน้าที่'); return; }
+        patch({ view: 'backoffice' });
+      },
       onGotoPortal: () => patch({ view: 'portal' }),
       onStartRequest: startRequest,
       onScrollCatalog: () => { const el = document.getElementById('catalog'); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' }); },
@@ -391,7 +455,7 @@ export default function App() {
       backBtnStyle: { display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '13px 22px', background: '#f1f2f4', color: '#374151', border: 'none', borderRadius: '999px', fontFamily: 'Kanit', fontWeight: 500, fontSize: '14px', cursor: 'pointer' } as React.CSSProperties,
       successRef: st.success ? st.success.refNumber : '',
 
-      historyOpen: st.historyOpen, historyEmpty: myRequests.length === 0, myRequestsVM,
+      historyOpen: st.historyOpen, historyEmpty: st.myRequests.length === 0, myRequestsVM,
 
       boStats, boTab: st.boTab, boRequestsVM, boCatalogVM,
       boAddOpen: st.boAddOpen, boAddMode: st.boAddMode, boDraft: st.draft,
@@ -407,8 +471,18 @@ export default function App() {
       lightbox: st.lightbox,
       onOpenLightbox: openLightbox,
       onCloseLightbox: closeLightbox,
+
+      authReady: st.authReady,
+      user: st.user ? { email: st.user.email, name: st.user.name, avatarUrl: st.user.avatarUrl } : null,
+      isStaff: st.isStaff,
+      loginOpen: st.loginOpen,
+      loginReason: st.loginReason,
+      onLogin: login,
+      onLogout: logout,
+      onOpenLogin: openLogin,
+      onCloseLogin: closeLogin,
     };
-  }, [st, patch, toggle, bump, setQty, startRequest, next, back, closeWizard, openLightbox, closeLightbox, setForm, reqCard, setStatus, openEdit, deleteMedia, openAdd, setDraft, uploadDraftImage, saveDraft]);
+  }, [st, patch, toggle, bump, setQty, startRequest, next, back, closeWizard, openLightbox, closeLightbox, login, logout, openLogin, closeLogin, flash, setForm, reqCard, setStatus, openEdit, deleteMedia, openAdd, setDraft, uploadDraftImage, saveDraft]);
 
   return (
     <>
@@ -417,6 +491,7 @@ export default function App() {
       {vm.wizardOpen && <RequestWizard vm={vm} />}
       {vm.historyOpen && <HistoryModal vm={vm} />}
       {vm.lightbox && <Lightbox vm={vm} />}
+      {vm.loginOpen && <Login vm={vm} />}
       {vm.toast && <Toast msg={vm.toast} />}
     </>
   );

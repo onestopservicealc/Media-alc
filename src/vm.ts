@@ -183,4 +183,15 @@ export interface AppVM {
   lightbox: string | null;
   onOpenLightbox: (url: string) => void;
   onCloseLightbox: () => void;
+
+  // auth
+  authReady: boolean;
+  user: { email: string; name: string; avatarUrl?: string } | null;
+  isStaff: boolean;
+  loginOpen: boolean;
+  loginReason: 'backoffice' | 'submit' | 'generic' | null;
+  onLogin: () => void;
+  onLogout: () => void;
+  onOpenLogin: (reason: 'backoffice' | 'submit' | 'generic') => void;
+  onCloseLogin: () => void;
 }

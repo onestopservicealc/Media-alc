@@ -39,9 +39,21 @@ export function Backoffice({ vm }: { vm: AppVM }) {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff8a97" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
               <span style={S("font-family:'Space Mono';font-weight:700;font-size:13.5px;color:#e6e8ec")}>{vm.clock}</span>
             </div>
+            {vm.user && (
+              <div style={S('display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);padding:5px 12px 5px 6px;border-radius:999px;border:1px solid rgba(255,255,255,.12)')}>
+                {vm.user.avatarUrl
+                  ? <img src={vm.user.avatarUrl} alt="" referrerPolicy="no-referrer" style={S('width:24px;height:24px;border-radius:999px;object-fit:cover')} />
+                  : <div style={S("width:24px;height:24px;border-radius:999px;background:#e8112d;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Kanit';font-weight:700;font-size:12px")}>{vm.user.name.charAt(0).toUpperCase()}</div>}
+                <span style={S("font-family:'Kanit';font-weight:500;font-size:12.5px;color:#e6e8ec;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap")}>{vm.user.name}</span>
+              </div>
+            )}
             <button onClick={vm.onGotoPortal} style={S("display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:#fff;color:#141821;border:none;border-radius:999px;font-family:'Kanit';font-weight:500;font-size:13.5px;cursor:pointer")}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
               <span>กลับหน้าประชาชน</span>
+            </button>
+            <button onClick={vm.onLogout} style={S("display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:999px;font-family:'Kanit';font-weight:500;font-size:13.5px;cursor:pointer")}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+              <span>ออกจากระบบ</span>
             </button>
           </div>
         </div>

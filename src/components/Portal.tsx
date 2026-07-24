@@ -43,6 +43,25 @@ export function Portal({ vm }: { vm: AppVM }) {
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={S('animation:pulse 2s infinite')}><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                   <span style={S("font-family:'Space Mono';font-weight:700;font-size:14px;letter-spacing:.5px")}>{vm.clock}</span>
                 </div>
+                {vm.user ? (
+                  <div style={S('display:flex;align-items:center;gap:8px')}>
+                    <div style={S('display:flex;align-items:center;gap:8px;background:#f6f7f9;padding:5px 12px 5px 6px;border-radius:999px;border:1px solid #eceef1')}>
+                      {vm.user.avatarUrl
+                        ? <img src={vm.user.avatarUrl} alt="" referrerPolicy="no-referrer" style={S('width:26px;height:26px;border-radius:999px;object-fit:cover')} />
+                        : <div style={S("width:26px;height:26px;border-radius:999px;background:#e8112d;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Kanit';font-weight:700;font-size:13px")}>{vm.user.name.charAt(0).toUpperCase()}</div>}
+                      <span style={S("font-family:'Kanit';font-weight:500;font-size:13px;color:#374151;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap")}>{vm.user.name}</span>
+                    </div>
+                    <button onClick={vm.onLogout} style={S("display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:#fff;color:#6b7280;border:1px solid #e5e7eb;border-radius:999px;font-family:'Kanit';font-weight:500;font-size:13px;cursor:pointer")}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                      <span>ออกจากระบบ</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => vm.onOpenLogin('generic')} style={S("display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:999px;font-family:'Kanit';font-weight:500;font-size:13.5px;cursor:pointer")}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>
+                    <span>เข้าสู่ระบบ</span>
+                  </button>
+                )}
                 <button onClick={vm.onGotoBO} style={S("display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:#111827;color:#fff;font-family:'Kanit';font-weight:500;font-size:13.5px;border:none;border-radius:999px;cursor:pointer")}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                   <span>สำหรับเจ้าหน้าที่</span>

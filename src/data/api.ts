@@ -1,167 +1,218 @@
 import { MediaMaterial, SubmittedRequest, SystemItem, MediaRequestForm } from '../types';
 import { formatThaiDateTime } from '../lib/ui';
+import { supabase } from '../lib/supabase';
 
 /* =========================================================================
-   Data-access layer (จุดเชื่อม / seam) ของทั้งแอป
-   -------------------------------------------------------------------------
-   ตอนนี้ backing = localStorage (ข้อมูลเก็บถาวรจริง refresh ไม่หาย)
-
-   เมื่อจะต่อ Supabase ทีหลัง: แก้ไขเฉพาะ implementation ในไฟล์นี้
-   (สร้าง supabase client, เรียก .from()/.rpc()/Storage) โดย "คง signature
-   ของทุกฟังก์ชันไว้เหมือนเดิม" → App.tsx และ component ทั้งหมดไม่ต้องแก้เลย
-
-   mapping ที่วางไว้สำหรับ Supabase:
-     fetchCatalog        → select media_materials where is_archived = false
-     fetchSystems        → select systems
-     fetchRequests       → select requests (staff, ต้อง auth)
-     submitRequest       → rpc('submit_request', ...) (ตัด stock แบบ atomic)
-     setRequestStatus    → rpc('set_request_status', ...)
-     saveMaterial        → insert/update media_materials (+ upload Storage)
-     archiveMaterial     → update media_materials set is_archived = true
-     getMyRequests       → rpc('get_requests_by_token', tokens[])
-     uploadImage         → Storage.upload('media-previews') → getPublicUrl
+   Data-access layer (จุดเชื่อม / seam) ของทั้งแอป — backing = Supabase
+   ทุกการอ่าน/เขียน + auth ผ่านไฟล์นี้ไฟล์เดียว
    ========================================================================= */
 
-// ระบบเริ่มต้นแบบว่าง (ไม่มีการ seed ข้อมูลตัวอย่าง)
-// เปลี่ยน version key เป็น v2 → localStorage ชุดเดิม (v1) ถูกละทิ้งทุกเครื่อง
-const KEYS = {
-  catalog: 'alc.catalog.v2',
-  requests: 'alc.requests.v2',
-  systems: 'alc.systems.v2',
-  myTokens: 'alc.myTokens.v2', // id ของคำขอที่ยื่นจากเครื่องนี้ (แทน tracking token)
-  refSeq: 'alc.refSeq.v2',
-};
-
-function read<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl?: string;
 }
 
-function write<T>(key: string, value: T): void {
-  localStorage.setItem(key, JSON.stringify(value));
+// ---------------------------------------------------------------- mappers (snake_case → โดเมน)
+
+function mapMaterial(r: Record<string, unknown>): MediaMaterial {
+  return {
+    id: r.id as string,
+    title: r.title as string,
+    category: r.category as string,
+    description: r.description as string,
+    maxAllowed: r.max_allowed as number,
+    availableStock: r.available_stock as number,
+    imageUrl: (r.image_url as string | null) ?? undefined,
+  };
 }
 
-/** จำลอง latency เล็กน้อยให้ flow แบบ async เหมือนเรียก network จริง */
-function delay<T>(value: T): Promise<T> {
-  return new Promise(resolve => setTimeout(() => resolve(value), 40));
+function mapSystem(r: Record<string, unknown>): SystemItem {
+  return {
+    name: r.name as string,
+    url: r.url as string,
+    desc: r.description as string,
+    cat: r.category as string,
+    icon: r.icon as string,
+    imageUrl: (r.image_url as string | null) ?? undefined,
+  };
 }
+
+function mapRequest(r: Record<string, unknown>): SubmittedRequest {
+  const items = (r.request_items as Array<Record<string, unknown>> | null) ?? [];
+  return {
+    id: r.id as string,
+    refNumber: r.ref_number as string,
+    submittedAt: formatThaiDateTime(new Date(r.submitted_at as string)),
+    fullName: r.full_name as string,
+    agencyName: r.agency_name as string,
+    phoneNumber: r.phone_number as string,
+    requiredDate: r.required_date as string,
+    shippingAddress: r.shipping_address as string,
+    purpose: r.purpose as string,
+    status: r.status as SubmittedRequest['status'],
+    selectedMaterials: items.map(it => ({
+      materialId: it.material_id as string,
+      quantity: it.quantity as number,
+    })),
+  };
+}
+
+function mapUser(u: { id: string; email?: string; user_metadata?: Record<string, unknown> } | null | undefined): AuthUser | null {
+  if (!u) return null;
+  const meta = u.user_metadata ?? {};
+  const email = u.email ?? '';
+  return {
+    id: u.id,
+    email,
+    name: (meta.full_name as string) || (meta.name as string) || email,
+    avatarUrl: (meta.avatar_url as string) || (meta.picture as string) || undefined,
+  };
+}
+
+const REQ_SELECT = '*, request_items(*)';
 
 // ---------------------------------------------------------------- reads
 
 export async function fetchCatalog(): Promise<MediaMaterial[]> {
-  return delay(read<MediaMaterial[]>(KEYS.catalog, []));
+  const { data, error } = await supabase
+    .from('media_materials')
+    .select('*')
+    .eq('is_archived', false)
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(mapMaterial);
 }
 
 export async function fetchSystems(): Promise<SystemItem[]> {
-  return delay(read<SystemItem[]>(KEYS.systems, []));
+  const { data, error } = await supabase.from('systems').select('*').order('sort_order');
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(mapSystem);
 }
 
+/** คำขอทั้งหมด (เจ้าหน้าที่เท่านั้น — RLS จะคืน [] ให้คนที่ไม่ใช่ staff) */
 export async function fetchRequests(): Promise<SubmittedRequest[]> {
-  return delay(read<SubmittedRequest[]>(KEYS.requests, []));
+  const { data, error } = await supabase
+    .from('requests')
+    .select(REQ_SELECT)
+    .order('submitted_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(mapRequest);
 }
 
-/** คำขอที่ยื่นจากเครื่องนี้ (ติดตามผ่าน token ที่เก็บใน localStorage) */
+/** คำขอของผู้ใช้ที่ล็อกอินอยู่ (ผูกกับบัญชี ข้ามเครื่องได้) */
 export async function getMyRequests(): Promise<SubmittedRequest[]> {
-  const tokens = read<string[]>(KEYS.myTokens, []);
-  const all = read<SubmittedRequest[]>(KEYS.requests, []);
-  return delay(all.filter(r => tokens.includes(r.id)));
-}
-
-/** id ของคำขอที่ยื่นจากเครื่องนี้ (ใช้เซ็ต state.myIds เพื่อคง vm เดิม) */
-export function getMyTokens(): string[] {
-  return read<string[]>(KEYS.myTokens, []);
+  const { data: sess } = await supabase.auth.getSession();
+  const uid = sess.session?.user.id;
+  if (!uid) return [];
+  const { data, error } = await supabase
+    .from('requests')
+    .select(REQ_SELECT)
+    .eq('user_id', uid)
+    .order('submitted_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(mapRequest);
 }
 
 // ---------------------------------------------------------------- writes
 
-/** สร้างเลขอ้างอิงไม่ซ้ำ ALC-{ปีพ.ศ.}-#### (แทน Math.random เดิมที่ชนกันได้) */
-function nextRefNumber(): string {
-  const seq = read<number>(KEYS.refSeq, 4821) + 1;
-  write(KEYS.refSeq, seq);
-  const beYear = new Date().getFullYear() + 543;
-  return `ALC-${beYear}-${String(seq).padStart(4, '0')}`;
-}
-
-/**
- * ส่งคำขอ + ตัด stock. ถ้าสื่อชิ้นใดคงคลังไม่พอจะ throw และไม่บันทึกอะไรเลย
- * (บน Supabase = rpc('submit_request') ที่ทำในทรานแซกชันเดียว)
- */
+/** ส่งคำขอ + ตัด stock แบบ atomic (ผ่าน RPC); ต้องล็อกอินก่อน */
 export async function submitRequest(form: MediaRequestForm): Promise<SubmittedRequest> {
-  const catalog = read<MediaMaterial[]>(KEYS.catalog, []);
-
-  // ตรวจ stock ก่อนตัด — ถ้าไม่พอ ยกเลิกทั้งคำขอ
-  for (const it of form.selectedMaterials) {
-    const m = catalog.find(x => x.id === it.materialId);
-    if (!m) throw new Error(`ไม่พบสื่อรหัส ${it.materialId}`);
-    if (it.quantity > m.maxAllowed) throw new Error(`"${m.title}" ขอได้ไม่เกิน ${m.maxAllowed} ต่อครั้ง`);
-    if ((m.availableStock ?? 0) < it.quantity) throw new Error(`"${m.title}" คงคลังไม่พอ (เหลือ ${m.availableStock ?? 0})`);
+  const { data, error } = await supabase.rpc('submit_request', { payload: form });
+  if (error) {
+    const msg = error.message || '';
+    if (msg.includes('AUTH_REQUIRED')) throw new Error('กรุณาเข้าสู่ระบบก่อนส่งคำขอ');
+    if (msg.includes('INSUFFICIENT_STOCK_OR_LIMIT')) throw new Error('มีสื่อบางรายการคงคลังไม่พอหรือเกินจำนวนที่ขอได้');
+    throw new Error(msg || 'ส่งคำขอไม่สำเร็จ');
   }
-
-  const nextCatalog = catalog.map(m => {
-    const it = form.selectedMaterials.find(s => s.materialId === m.id);
-    return it ? { ...m, availableStock: (m.availableStock ?? 0) - it.quantity } : m;
-  });
-
-  const req: SubmittedRequest = {
+  const row = Array.isArray(data) ? data[0] : data;
+  return {
     ...form,
-    id: crypto.randomUUID(),
-    refNumber: nextRefNumber(),
-    submittedAt: formatThaiDateTime(new Date()),
+    id: row.id as string,
+    refNumber: row.ref_number as string,
+    submittedAt: formatThaiDateTime(new Date(row.submitted_at as string)),
     status: 'รอการอนุมัติ',
   };
-
-  const requests = read<SubmittedRequest[]>(KEYS.requests, []);
-  write(KEYS.requests, [req, ...requests]);
-  write(KEYS.catalog, nextCatalog);
-  write(KEYS.myTokens, [req.id, ...read<string[]>(KEYS.myTokens, [])]);
-
-  return delay(req);
 }
 
 export async function setRequestStatus(id: string, status: SubmittedRequest['status']): Promise<void> {
-  const requests = read<SubmittedRequest[]>(KEYS.requests, []);
-  write(KEYS.requests, requests.map(r => (r.id === id ? { ...r, status } : r)));
-  return delay(undefined);
+  const { error } = await supabase.rpc('set_request_status', { req_id: id, new_status: status });
+  if (error) throw new Error(error.message);
 }
 
-/** เพิ่ม (mode='add') หรือแก้ไข (mode='edit') สื่อในคลัง แล้วคืนรายการที่บันทึก */
+/** เพิ่ม (mode='add') หรือแก้ไข (mode='edit') สื่อในคลัง */
 export async function saveMaterial(mat: MediaMaterial, mode: 'add' | 'edit'): Promise<MediaMaterial> {
-  const catalog = read<MediaMaterial[]>(KEYS.catalog, []);
+  const row = {
+    title: mat.title,
+    category: mat.category,
+    description: mat.description,
+    max_allowed: mat.maxAllowed,
+    available_stock: mat.availableStock ?? 0,
+    image_url: mat.imageUrl ?? null,
+  };
   if (mode === 'edit') {
-    write(KEYS.catalog, catalog.map(m => (m.id === mat.id ? { ...m, ...mat } : m)));
-    return delay(mat);
+    const { data, error } = await supabase.from('media_materials').update(row).eq('id', mat.id).select().single();
+    if (error) throw new Error(error.message);
+    return mapMaterial(data);
   }
-  const created: MediaMaterial = { ...mat, id: mat.id || crypto.randomUUID() };
-  write(KEYS.catalog, [created, ...catalog]);
-  return delay(created);
+  const { data, error } = await supabase.from('media_materials').insert(row).select().single();
+  if (error) throw new Error(error.message);
+  return mapMaterial(data);
 }
 
 export async function archiveMaterial(id: string): Promise<void> {
-  const catalog = read<MediaMaterial[]>(KEYS.catalog, []);
-  // localStorage เฟสนี้ลบออกจากรายการ; บน Supabase จะเป็น soft-delete (is_archived=true)
-  write(KEYS.catalog, catalog.filter(m => m.id !== id));
-  return delay(undefined);
+  const { error } = await supabase.from('media_materials').update({ is_archived: true }).eq('id', id);
+  if (error) throw new Error(error.message);
 }
 
-/**
- * อัปโหลดรูปพรีวิว แล้วคืน URL ของรูป
- * -----------------------------------------------------------------------------
- * เฟสนี้: แปลงไฟล์เป็น data URL (base64) เก็บฝังใน localStorage ได้เลย
- * ตอนต่อ Supabase: เปลี่ยนเป็น upload เข้า bucket 'media-previews'
- *   แล้ว return getPublicUrl(path) — โดย signature เดิมไม่เปลี่ยน
- */
+/** อัปโหลดรูปพรีวิวขึ้น bucket 'media-previews' แล้วคืน public URL */
 export async function uploadImage(file: File): Promise<string> {
   if (!file.type.startsWith('image/')) throw new Error('กรุณาเลือกไฟล์รูปภาพ (jpg/png/webp)');
-  const MAX_BYTES = 2 * 1024 * 1024;
-  if (file.size > MAX_BYTES) throw new Error('ไฟล์รูปต้องไม่เกิน 2 MB');
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(new Error('อ่านไฟล์รูปไม่สำเร็จ'));
-    reader.readAsDataURL(file);
+  const MAX_BYTES = 5 * 1024 * 1024;
+  if (file.size > MAX_BYTES) throw new Error('ไฟล์รูปต้องไม่เกิน 5 MB');
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const path = `${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from('media-previews').upload(path, file, {
+    contentType: file.type,
+    upsert: false,
   });
+  if (error) throw new Error(error.message);
+  const { data } = supabase.storage.from('media-previews').getPublicUrl(path);
+  return data.publicUrl;
+}
+
+// ---------------------------------------------------------------- auth
+
+export async function signInWithGoogle(): Promise<void> {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin },
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function signOut(): Promise<void> {
+  await supabase.auth.signOut();
+}
+
+/** ผู้ใช้ปัจจุบันจาก session (เร็ว ไม่ยิง network) */
+export async function getCurrentUser(): Promise<AuthUser | null> {
+  const { data } = await supabase.auth.getSession();
+  return mapUser(data.session?.user);
+}
+
+/** subscribe การเปลี่ยนสถานะ auth; คืนฟังก์ชัน unsubscribe */
+export function onAuthChange(cb: (user: AuthUser | null) => void): () => void {
+  const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+    cb(mapUser(session?.user));
+  });
+  return () => data.subscription.unsubscribe();
+}
+
+/** ผู้ใช้ปัจจุบันเป็นเจ้าหน้าที่ (อยู่ใน allowlist) หรือไม่ */
+export async function checkIsStaff(): Promise<boolean> {
+  const { data, error } = await supabase.rpc('is_staff');
+  if (error) return false;
+  return data === true;
 }

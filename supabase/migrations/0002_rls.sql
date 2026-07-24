@@ -1,10 +1,12 @@
 -- =============================================================================
--- Media-alc — Row Level Security (เตรียมไว้สำหรับตอนต่อ Supabase)
+-- Media-alc — Row Level Security
 -- แนวคิด: default-deny ทุกตาราง แล้วเปิดสิทธิ์เท่าที่จำเป็น
---   staff = authenticated user (ปิด public sign-up ใน Auth settings)
---   ประชาชน = anon: อ่าน catalog/systems ได้, ส่ง/ดูคำขอผ่าน RPC เท่านั้น
+--   ประชาชน (authenticated ทั่วไป): ดู catalog/systems, ส่ง/ดูคำขอ "ของตัวเอง"
+--   เจ้าหน้าที่ (is_staff()): จัดการ catalog + ดู/อัปเดตคำขอทั้งหมด
+--   anon (ยังไม่ login): ดู catalog/systems ได้อย่างเดียว
 -- =============================================================================
 
+alter table staff           enable row level security;  -- ไม่มี policy = เข้าถึงตรงไม่ได้ (ใช้ผ่าน is_staff() เท่านั้น)
 alter table media_materials enable row level security;
 alter table systems         enable row level security;
 alter table requests        enable row level security;
@@ -12,27 +14,45 @@ alter table request_items   enable row level security;
 
 -- ---------------------------------------------------------------- media_materials
 create policy media_public_read on media_materials
-  for select to anon using (is_archived = false);
-create policy media_staff_read on media_materials
-  for select to authenticated using (true);
+  for select to anon, authenticated using (is_archived = false or is_staff());
 create policy media_staff_write on media_materials
-  for all to authenticated using (true) with check (true);
+  for all to authenticated using (is_staff()) with check (is_staff());
 
 -- ---------------------------------------------------------------- systems
 create policy systems_public_read on systems
   for select to anon, authenticated using (true);
 create policy systems_staff_write on systems
-  for all to authenticated using (true) with check (true);
+  for all to authenticated using (is_staff()) with check (is_staff());
 
--- ---------------------------------------------------------------- requests / request_items
--- anon ไม่มีสิทธิ์ตรง — ส่งผ่าน submit_request() และอ่านผ่าน get_requests_by_token()
--- (ทั้งคู่เป็น security definer จึง bypass RLS ได้อย่างควบคุม)
-create policy requests_staff_all on requests
-  for all to authenticated using (true) with check (true);
-create policy request_items_staff_all on request_items
-  for all to authenticated using (true) with check (true);
+-- ---------------------------------------------------------------- requests
+-- insert ทำผ่าน submit_request() (security definer) เท่านั้น
+create policy requests_owner_read on requests
+  for select to authenticated using (user_id = auth.uid() or is_staff());
+create policy requests_staff_update on requests
+  for update to authenticated using (is_staff()) with check (is_staff());
+
+-- ---------------------------------------------------------------- request_items
+create policy request_items_read on request_items
+  for select to authenticated using (
+    exists (
+      select 1 from requests r
+      where r.id = request_items.request_id
+        and (r.user_id = auth.uid() or is_staff())
+    )
+  );
 
 -- ---------------------------------------------------------------- grant execute ให้ RPC
-grant execute on function submit_request(jsonb)        to anon, authenticated;
-grant execute on function get_requests_by_token(uuid[]) to anon, authenticated;
+grant execute on function submit_request(jsonb)                    to authenticated;
 grant execute on function set_request_status(uuid, request_status) to authenticated;
+grant execute on function is_staff()                               to authenticated;
+
+-- ---------------------------------------------------------------- Storage: bucket 'media-previews'
+-- (สร้าง bucket แบบ public ใน dashboard ก่อน) — จำกัดสิทธิ์ upload/แก้/ลบ ให้ staff
+create policy media_previews_public_read on storage.objects
+  for select to anon, authenticated using (bucket_id = 'media-previews');
+create policy media_previews_staff_write on storage.objects
+  for insert to authenticated with check (bucket_id = 'media-previews' and is_staff());
+create policy media_previews_staff_update on storage.objects
+  for update to authenticated using (bucket_id = 'media-previews' and is_staff());
+create policy media_previews_staff_delete on storage.objects
+  for delete to authenticated using (bucket_id = 'media-previews' and is_staff());
