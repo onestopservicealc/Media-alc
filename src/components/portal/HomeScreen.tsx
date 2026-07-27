@@ -77,16 +77,16 @@ export function HomeScreen({ vm }: { vm: AppVM }) {
           <h3 style={S("margin:0 0 10px;font-family:'Kanit';font-weight:600;font-size:15px;color:#141821")}>สื่อแนะนำ</h3>
           <div className="media-grid">
             {vm.popular.map(m => (
-              <div key={m.id} style={S('display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #dfe2e7;border-radius:12px;padding:10px 12px')}>
-                <div style={S('position:relative;width:52px;height:52px;border-radius:8px;overflow:hidden;background:#f1f2f4;flex-shrink:0')}>
+              <div key={m.id} style={S('display:flex;flex-direction:column;height:100%;background:#fff;border:1px solid #dfe2e7;border-radius:12px;overflow:hidden')}>
+                <div style={S('position:relative;width:100%;height:150px;background:#f1f2f4;flex-shrink:0')}>
                   <div style={m.fbStyle}>{m.catShort}</div>
                   {m.imageUrl && <img src={m.imageUrl} alt="" referrerPolicy="no-referrer" onError={vm.onImgErr} style={S('position:absolute;inset:0;width:100%;height:100%;object-fit:cover')} />}
                 </div>
-                <div style={S('flex:1;min-width:0')}>
+                <div style={S('padding:12px;display:flex;flex-direction:column;flex:1')}>
                   <div style={S("font-family:'Kanit';font-weight:600;font-size:13px;color:#141821;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden")}>{m.title}</div>
-                  <div style={S('font-size:11px;color:#9ca3af;margin-top:2px')}>คงคลัง {m.stockText} ชิ้น</div>
+                  <div style={S('font-size:11px;color:#9ca3af;margin-top:2px;margin-bottom:10px')}>คงคลัง {m.stockText} ชิ้น</div>
+                  <button onClick={m.onAdd} aria-label={`เพิ่ม ${m.title} ลงคำขอ`} style={m.addBtn}>{m.addLabel}</button>
                 </div>
-                <button onClick={m.onAdd} aria-label={`เพิ่ม ${m.title} ลงคำขอ`} style={m.addBtn}>{m.addLabel}</button>
               </div>
             ))}
           </div>
