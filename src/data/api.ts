@@ -41,10 +41,12 @@ function mapSystem(r: Record<string, unknown>): SystemItem {
 
 function mapRequest(r: Record<string, unknown>): SubmittedRequest {
   const items = (r.request_items as Array<Record<string, unknown>> | null) ?? [];
+  const submittedAtISO = r.submitted_at as string;
   return {
     id: r.id as string,
     refNumber: r.ref_number as string,
-    submittedAt: formatThaiDateTime(new Date(r.submitted_at as string)),
+    submittedAt: formatThaiDateTime(new Date(submittedAtISO)),
+    submittedAtISO,
     fullName: r.full_name as string,
     agencyName: r.agency_name as string,
     phoneNumber: r.phone_number as string,
@@ -127,11 +129,13 @@ export async function submitRequest(form: MediaRequestForm): Promise<SubmittedRe
     throw new Error(msg || 'ส่งคำขอไม่สำเร็จ');
   }
   const row = Array.isArray(data) ? data[0] : data;
+  const submittedAtISO = row.submitted_at as string;
   return {
     ...form,
     id: row.id as string,
     refNumber: row.ref_number as string,
-    submittedAt: formatThaiDateTime(new Date(row.submitted_at as string)),
+    submittedAt: formatThaiDateTime(new Date(submittedAtISO)),
+    submittedAtISO,
     status: 'รอการอนุมัติ',
   };
 }

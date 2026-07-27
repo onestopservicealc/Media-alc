@@ -1,244 +1,252 @@
-import React from 'react';
 import { AppVM } from '../vm';
-import { css } from '../lib/ui';
+import { css, MEDIA_CATEGORIES, STATUSES } from '../lib/ui';
+import { MediaEditPanel } from './backoffice/MediaEditPanel';
+import { RequestDetail } from './backoffice/RequestDetail';
+import {
+  AlertIcon, ArrowLeftIcon, CheckIcon, DownloadIcon, EyeIcon, LogOutIcon, SearchIcon, ShieldPlainIcon, TrashIcon,
+} from './icons';
 
 const S = css;
 
 export function Backoffice({ vm }: { vm: AppVM }) {
-  const isRequests = vm.boTab === 'requests';
-  const isCatalog = !isRequests;
-
-  const tabBase: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '11px 20px', borderRadius: '999px', fontFamily: 'Kanit', fontWeight: 600, fontSize: '14px', cursor: 'pointer', transition: 'all .2s' };
-  const on: React.CSSProperties = { ...tabBase, background: '#141821', color: '#fff', border: 'none' };
-  const off: React.CSSProperties = { ...tabBase, background: '#fff', color: '#6b7280', border: '1px solid #e5e7eb' };
-  const badge = (active: boolean): React.CSSProperties => ({ fontFamily: 'Space Mono', fontWeight: 700, fontSize: '11.5px', padding: '1px 8px', borderRadius: '999px', background: active ? 'rgba(255,255,255,.2)' : '#f1f2f4', color: active ? '#fff' : '#9ca3af' });
-
-  const addOpen = vm.boAddOpen;
-  const mode = vm.boAddMode;
-  const formTitle = mode === 'edit' ? 'แก้ไขสื่อประชาสัมพันธ์' : 'เพิ่มสื่อใหม่ลงคลัง';
-  const saveLabel = mode === 'edit' ? 'บันทึกการแก้ไข' : 'บันทึกสื่อใหม่';
-  const addToggleLabel = addOpen ? 'ซ่อนแบบฟอร์ม' : 'เพิ่มสื่อใหม่';
-  const addToggleIcon: React.CSSProperties = { fontWeight: 700, fontSize: '15px', lineHeight: 1, display: addOpen ? 'none' : 'inline' };
-  const addToggleStyle: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 18px', background: addOpen ? '#f1f2f4' : '#e8112d', color: addOpen ? '#374151' : '#fff', border: 'none', borderRadius: '999px', fontFamily: 'Kanit', fontWeight: 600, fontSize: '13.5px', cursor: 'pointer' };
-  const d = vm.boDraft;
-
   return (
-    <div style={S('min-height:100vh;background:#f4f5f7;display:flex;flex-direction:column')}>
+    <div className="bo-shell">
 
-      <header style={S('background:linear-gradient(120deg,#141821,#1f2430);color:#fff;position:sticky;top:0;z-index:20')}>
-        <div style={S('max-width:1200px;margin:0 auto;padding:15px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap')}>
-          <div style={S('display:flex;align-items:center;gap:13px')}>
-            <div style={S('width:44px;height:44px;border-radius:13px;background:#e8112d;display:flex;align-items:center;justify-content:center')}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg></div>
-            <div>
-              <div style={S("font-size:11px;font-weight:600;color:#ff8a97;font-family:'Kanit';letter-spacing:.5px")}>โหมดเจ้าหน้าที่ · หลังบ้าน</div>
-              <h1 style={S("margin:1px 0 0;font-family:'Kanit';font-weight:700;font-size:19px")}>แดชบอร์ดจัดการคำขอและคลังสื่อ</h1>
-            </div>
+      {/* เมนูข้าง */}
+      <aside className="bo-side">
+        <div style={S('padding:18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid #262b36')}>
+          <div style={S('width:34px;height:34px;border-radius:8px;background:#e8112d;display:flex;align-items:center;justify-content:center;flex-shrink:0')}>
+            <ShieldPlainIcon size={18} />
           </div>
-          <div style={S('display:flex;align-items:center;gap:10px')}>
-            <div style={S('display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);padding:7px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.12)')}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff8a97" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-              <span style={S("font-family:'Space Mono';font-weight:700;font-size:13.5px;color:#e6e8ec")}>{vm.clock}</span>
-            </div>
-            {vm.user && (
-              <div style={S('display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);padding:5px 12px 5px 6px;border-radius:999px;border:1px solid rgba(255,255,255,.12)')}>
-                {vm.user.avatarUrl
-                  ? <img src={vm.user.avatarUrl} alt="" referrerPolicy="no-referrer" style={S('width:24px;height:24px;border-radius:999px;object-fit:cover')} />
-                  : <div style={S("width:24px;height:24px;border-radius:999px;background:#e8112d;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Kanit';font-weight:700;font-size:12px")}>{vm.user.name.charAt(0).toUpperCase()}</div>}
-                <span style={S("font-family:'Kanit';font-weight:500;font-size:12.5px;color:#e6e8ec;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap")}>{vm.user.name}</span>
-              </div>
-            )}
-            <button onClick={vm.onGotoPortal} style={S("display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:#fff;color:#141821;border:none;border-radius:999px;font-family:'Kanit';font-weight:500;font-size:13.5px;cursor:pointer")}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
-              <span>กลับหน้าประชาชน</span>
-            </button>
-            <button onClick={vm.onLogout} style={S("display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:999px;font-family:'Kanit';font-weight:500;font-size:13.5px;cursor:pointer")}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
-              <span>ออกจากระบบ</span>
-            </button>
+          <div style={S('flex:1;min-width:0')}>
+            <div style={S("font-family:'Kanit';font-weight:600;font-size:13.5px;line-height:1.2")}>ระบบจัดการสื่อ</div>
+            <div style={S('font-size:10.5px;color:#8b909b')}>สคอ. · หลังบ้าน</div>
           </div>
+          <button onClick={vm.onGotoPortal} aria-label="กลับหน้าประชาชน" style={S('width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0')}>
+            <ArrowLeftIcon size={16} />
+          </button>
         </div>
-      </header>
 
-      <main style={S('max-width:1200px;margin:0 auto;padding:26px 24px 44px;width:100%;flex:1')}>
-
-        {/* Stats */}
-        <div style={S('display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:26px')}>
-          {vm.boStats.map(st => (
-            <div key={st.label} style={S('background:#fff;border:1px solid #eceef1;border-radius:18px;padding:18px 18px 16px')}>
-              <div style={S("font-size:12px;color:#9ca3af;font-family:'Kanit';font-weight:500;margin-bottom:8px")}>{st.label}</div>
-              <div style={S('display:flex;align-items:baseline;gap:6px')}>
-                <span style={st.valueStyle}>{st.value}</span>
-                <span style={S('font-size:11.5px;color:#9ca3af')}>{st.sub}</span>
-              </div>
-            </div>
+        <nav className="bo-side-nav scr" style={S('padding:12px 10px;display:flex;flex-direction:column;gap:3px')}>
+          {vm.boNav.map(n => (
+            <button key={n.key} onClick={n.onPick} style={n.style}>
+              <span style={n.markStyle} />
+              {n.label}
+              {n.hasCount && <span style={n.countStyle}>{n.count}</span>}
+            </button>
           ))}
-        </div>
+        </nav>
 
-        {/* Tabs */}
-        <div style={S('display:flex;gap:8px;margin-bottom:22px')}>
-          <button onClick={() => vm.onBoTab('requests')} style={isRequests ? on : off}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5Z" /><polyline points="14 2 14 8 20 8" /></svg>
-            <span>คำขอที่เข้ามา</span>
-            <span style={badge(isRequests)}>{vm.boRequestsVM.length}</span>
-          </button>
-          <button onClick={() => vm.onBoTab('catalog')} style={isCatalog ? on : off}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15" /><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /><path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" /></svg>
-            <span>คลังสื่อ</span>
-            <span style={badge(isCatalog)}>{vm.boCatalogVM.length}</span>
-          </button>
-        </div>
-
-        {/* Requests tab */}
-        {isRequests && (
-          <div style={S('display:flex;flex-direction:column;gap:14px')}>
-            {vm.boRequestsVM.map(r => (
-              <div key={r.id} style={S('background:#fff;border:1px solid #eceef1;border-radius:20px;padding:18px 20px')}>
-                <div style={S('display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-bottom:14px;border-bottom:1px solid #f1f2f4')}>
-                  <div style={S('display:flex;align-items:center;gap:12px;flex-wrap:wrap')}>
-                    <span style={S("font-family:'Space Mono';font-weight:700;font-size:14px;color:#e8112d;background:#fef2f2;padding:4px 12px;border-radius:999px")}>{r.refNumber}</span>
-                    <span style={S("font-size:12px;color:#9ca3af;font-family:'Space Mono'")}>ยื่นเมื่อ {r.submittedAt}</span>
-                  </div>
-                  <span style={r.statusStyle}><span style={r.statusDot} />{r.status}</span>
-                </div>
-                <div style={S('display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px 22px;margin:14px 0;font-size:13px;color:#374151')}>
-                  <div style={S('display:flex;align-items:center;gap:7px')}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg><span>{r.fullName}</span></div>
-                  <div style={S('display:flex;align-items:center;gap:7px')}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" /></svg><span>{r.agencyName}</span></div>
-                  <div style={S('display:flex;align-items:center;gap:7px')}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg><span style={S("font-family:'Space Mono'")}>{r.phoneNumber}</span></div>
-                  <div style={S('display:flex;align-items:center;gap:7px')}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg><span>ใช้ {r.requiredDate}</span></div>
-                  <div style={S('display:flex;align-items:flex-start;gap:7px;grid-column:1/-1')}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={S('flex-shrink:0;margin-top:2px')}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg><span style={S('color:#6b7280')}>{r.shippingAddress}</span></div>
-                </div>
-                <div style={S('background:#f6f7f9;border-radius:14px;padding:12px 14px;margin-bottom:14px')}>
-                  <div style={S("font-size:12px;font-weight:600;color:#6b7280;font-family:'Kanit';margin-bottom:10px")}>รายการสื่อที่ขอ (รวม {r.itemsTotal} ชิ้น)</div>
-                  <div style={S('display:flex;flex-direction:column;gap:8px')}>
-                    {r.items.map(it => (
-                      <div key={it.materialId} style={S('display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #eceef1;border-radius:12px;padding:8px 12px')}>
-                        <div onClick={() => it.imageUrl && vm.onOpenLightbox(it.imageUrl)} style={{ ...S('position:relative;width:48px;height:48px;border-radius:10px;overflow:hidden;background:#f1f2f4;flex-shrink:0'), cursor: it.imageUrl ? 'zoom-in' : 'default' }}>
-                          <div style={it.fbStyleSm}>{it.catShort}</div>
-                          <img src={it.imageUrl} alt={it.title} referrerPolicy="no-referrer" onError={vm.onImgErr} style={S('position:absolute;inset:0;width:100%;height:100%;object-fit:cover')} />
-                        </div>
-                        <span style={S("flex:1;min-width:0;font-family:'Kanit';font-weight:500;font-size:13px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap")}>{it.title}</span>
-                        <span style={S("font-family:'Space Mono';font-weight:700;font-size:13px;color:#e8112d;background:#fef2f2;padding:3px 10px;border-radius:999px;flex-shrink:0")}>×{it.quantity}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div style={S('display:flex;align-items:center;gap:8px;flex-wrap:wrap')}>
-                  <span style={S("font-size:12px;color:#9ca3af;font-family:'Kanit';margin-right:4px")}>อัปเดตสถานะ:</span>
-                  {r.statuses.map(st => (
-                    <button key={st.label} onClick={st.onPick} style={st.style}>{st.label}</button>
-                  ))}
-                </div>
-              </div>
-            ))}
+        <div className="bo-side-user" style={S('margin-top:auto;padding:14px;border-top:1px solid #262b36;display:flex;align-items:center;gap:10px')}>
+          {vm.user?.avatarUrl
+            ? <img src={vm.user.avatarUrl} alt="" referrerPolicy="no-referrer" style={S('width:32px;height:32px;border-radius:999px;object-fit:cover;flex-shrink:0')} />
+            : <div style={S("width:32px;height:32px;border-radius:999px;background:#e8112d;display:flex;align-items:center;justify-content:center;font-family:'Kanit';font-weight:700;font-size:13px;flex-shrink:0")}>{(vm.user?.name ?? 'จ').charAt(0).toUpperCase()}</div>}
+          <div style={S('flex:1;min-width:0')}>
+            <div style={S("font-family:'Kanit';font-weight:500;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap")}>{vm.user?.name ?? 'เจ้าหน้าที่'}</div>
+            <div style={S('font-size:10.5px;color:#8b909b')}>ผู้ดูแลระบบ · {vm.clock}</div>
           </div>
-        )}
+          <button onClick={vm.onLogout} aria-label="ออกจากระบบ" style={S('width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.08);border:none;color:#a8aeb9;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0')}>
+            <LogOutIcon size={15} />
+          </button>
+        </div>
+      </aside>
 
-        {/* Catalog tab */}
-        {isCatalog && (
+      {/* เนื้อหา */}
+      <div className="bo-main">
+        <div style={S('background:#fff;border-bottom:1px solid #e5e7eb;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-shrink:0;flex-wrap:wrap')}>
           <div>
-            <div style={S('display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px')}>
-              <h2 style={S("margin:0;font-family:'Kanit';font-weight:700;font-size:18px")}>คลังสื่อทั้งหมด ({vm.boCatalogVM.length} รายการ)</h2>
-              <button onClick={vm.onToggleAdd} style={addToggleStyle}>
-                <span style={addToggleIcon}>＋</span><span>{addToggleLabel}</span>
+            <div style={S("font-size:11.5px;color:#9ca3af;font-family:'Kanit'")}>หลังบ้าน / {vm.boCrumb}</div>
+            <h2 style={S("margin:2px 0 0;font-family:'Kanit';font-weight:700;font-size:19px;color:#141821")}>{vm.boTitle}</h2>
+          </div>
+          <div style={S('display:flex;align-items:center;gap:10px;flex-wrap:wrap')}>
+            {vm.boView === 'requests' && (
+              <button onClick={vm.onBoExport} style={S("height:40px;padding:0 15px;background:#fff;border:1px solid #e5e7eb;border-radius:9px;font-family:'Kanit';font-weight:500;font-size:13px;color:#374151;cursor:pointer;display:inline-flex;align-items:center;gap:7px")}>
+                <DownloadIcon size={15} />ส่งออก Excel
               </button>
-            </div>
-
-            {addOpen && (
-              <div style={S('background:#fff;border:1px solid #fbd5da;border-radius:20px;padding:20px;margin-bottom:18px;animation:fadeIn .25s ease')}>
-                <div style={S("display:flex;align-items:center;gap:8px;font-family:'Kanit';font-weight:700;font-size:14px;color:#e8112d;margin-bottom:16px")}>
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" /><line x1="12" y1="10" x2="12" y2="16" /><line x1="9" y1="13" x2="15" y2="13" /></svg>
-                  <span>{formTitle}</span>
-                </div>
-                <div style={S('display:grid;grid-template-columns:1fr 1fr;gap:14px')}>
-                  <div>
-                    <label style={S('display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px')}>ชื่อสื่อประชาสัมพันธ์ <span style={S('color:#e8112d')}>*</span></label>
-                    <input type="text" value={d.title} onChange={e => vm.onDraftField('title', e.target.value)} placeholder="เช่น แผ่นพับงดเหล้าเข้าพรรษา 2569" style={S('width:100%;padding:10px 13px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:11px;font-size:13px;outline:none')} />
-                  </div>
-                  <div>
-                    <label style={S('display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px')}>ประเภท/หมวดหมู่</label>
-                    <select value={d.category} onChange={e => vm.onDraftField('category', e.target.value)} style={S('width:100%;padding:10px 13px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:11px;font-size:13px;outline:none')}>
-                      <option value="แผ่นพับ (Brochure)">แผ่นพับ (Brochure)</option>
-                      <option value="โปสเตอร์ (Poster)">โปสเตอร์ (Poster)</option>
-                      <option value="สติ๊กเกอร์ (Sticker)">สติ๊กเกอร์ (Sticker)</option>
-                      <option value="คู่มือ/หนังสือ (Handbook)">คู่มือ/หนังสือ (Handbook)</option>
-                      <option value="ป้ายแบนเนอร์ (Banner)">ป้ายแบนเนอร์ (Banner)</option>
-                      <option value="ของที่ระลึกรณรงค์ (Souvenir)">ของที่ระลึกรณรงค์ (Souvenir)</option>
-                    </select>
-                  </div>
-                </div>
-                <div style={S('margin-top:14px')}>
-                  <label style={S('display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px')}>คำอธิบายรายละเอียด <span style={S('color:#e8112d')}>*</span></label>
-                  <textarea rows={2} value={d.description} onChange={e => vm.onDraftField('description', e.target.value)} placeholder="รายละเอียดเนื้อหาและขนาดกระดาษ..." style={S('width:100%;padding:10px 13px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:11px;font-size:13px;outline:none;resize:none;font-family:inherit')} />
-                </div>
-                <div style={S('display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px')}>
-                  <div>
-                    <label style={S('display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px')}>จำกัด/ครั้ง (≤50)</label>
-                    <input type="number" value={d.maxAllowed} onChange={e => vm.onDraftField('maxAllowed', e.target.value)} style={S("width:100%;padding:10px 13px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:11px;font-size:13px;outline:none;font-family:'Space Mono'")} />
-                  </div>
-                  <div>
-                    <label style={S('display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px')}>คงคลัง</label>
-                    <input type="number" value={d.availableStock} onChange={e => vm.onDraftField('availableStock', e.target.value)} style={S("width:100%;padding:10px 13px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:11px;font-size:13px;outline:none;font-family:'Space Mono'")} />
-                  </div>
-                </div>
-                <div style={S('margin-top:14px')}>
-                  <label style={S('display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px')}>รูปตัวอย่าง (ไม่บังคับ · ไฟล์ภาพ ≤ 2 MB)</label>
-                  <div style={S('display:flex;align-items:center;gap:12px;flex-wrap:wrap')}>
-                    {d.imageUrl && (
-                      <div style={S('position:relative;width:72px;height:72px;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;flex-shrink:0;background:#f1f2f4')}>
-                        <img src={d.imageUrl} alt="ตัวอย่าง" onError={vm.onImgErr} style={S('width:100%;height:100%;object-fit:cover')} />
-                      </div>
-                    )}
-                    <label style={S("display:inline-flex;align-items:center;gap:7px;padding:10px 16px;background:#fff;color:#374151;border:1px dashed #cbd0d6;border-radius:11px;font-family:'Kanit';font-weight:500;font-size:13px;cursor:pointer")}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                      <span>{d.imageUrl ? 'เปลี่ยนรูป' : 'อัปโหลดรูป'}</span>
-                      <input type="file" accept="image/*" style={S('display:none')} onChange={e => { const f = e.target.files?.[0]; if (f) vm.onUploadDraftImage(f); e.target.value = ''; }} />
-                    </label>
-                    {d.imageUrl && (
-                      <button type="button" onClick={() => vm.onDraftField('imageUrl', '')} style={S("padding:9px 14px;background:#fef2f2;color:#e8112d;border:none;border-radius:11px;font-family:'Kanit';font-weight:500;font-size:12.5px;cursor:pointer")}>ลบรูป</button>
-                    )}
-                  </div>
-                </div>
-                <div style={S('display:flex;justify-content:flex-end;gap:10px;margin-top:18px')}>
-                  <button onClick={vm.onToggleAdd} style={S("padding:10px 20px;background:#f1f2f4;color:#374151;border:none;border-radius:999px;font-family:'Kanit';font-size:13.5px;cursor:pointer")}>ยกเลิก</button>
-                  <button onClick={vm.onSaveDraft} style={S("padding:10px 24px;background:#e8112d;color:#fff;border:none;border-radius:999px;font-family:'Kanit';font-weight:600;font-size:13.5px;cursor:pointer")}>{saveLabel}</button>
-                </div>
-              </div>
             )}
+            <button onClick={vm.onOpenAdd} style={S("height:40px;padding:0 16px;background:#e8112d;border:none;border-radius:9px;font-family:'Kanit';font-weight:600;font-size:13px;color:#fff;cursor:pointer")}>＋ เพิ่มสื่อใหม่</button>
+          </div>
+        </div>
 
-            <div style={S('display:flex;flex-direction:column;gap:12px')}>
-              {vm.boCatalogVM.map(m => (
-                <div key={m.id} style={S('background:#fff;border:1px solid #eceef1;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap')}>
-                  <div style={S('position:relative;width:56px;height:56px;border-radius:12px;overflow:hidden;background:#f1f2f4;flex-shrink:0')}>
-                    <div style={m.fbStyleSm}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21" /></svg></div>
-                    <img src={m.imageUrl} alt={m.title} referrerPolicy="no-referrer" onError={vm.onImgErr} style={S('position:absolute;inset:0;width:100%;height:100%;object-fit:cover')} />
-                  </div>
-                  <div style={S('flex:1;min-width:200px')}>
-                    <div style={S('display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px')}>
-                      <span style={S("font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:999px;background:#f6f7f9;color:#6b7280;font-family:'Kanit'")}>{m.category}</span>
-                    </div>
-                    <h4 style={S("margin:0;font-family:'Kanit';font-weight:600;font-size:13.5px;line-height:1.35")}>{m.title}</h4>
-                    <p style={S('margin:2px 0 0;font-size:12px;color:#9ca3af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:520px')}>{m.description}</p>
-                  </div>
-                  <div style={S('text-align:right;margin-right:4px')}>
-                    <div style={S('font-size:10.5px;color:#9ca3af')}>คงคลัง</div>
-                    <div style={S("font-family:'Space Mono';font-weight:700;font-size:14px;color:#374151")}>{m.stockText}</div>
-                  </div>
-                  <div style={S('display:flex;align-items:center;gap:8px')}>
-                    <button onClick={m.onEdit} style={S("display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:999px;font-family:'Kanit';font-weight:500;font-size:12.5px;cursor:pointer")}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
-                      <span>แก้ไข</span>
-                    </button>
-                    <button onClick={m.onDelete} style={S('width:36px;height:36px;border-radius:999px;background:#fef2f2;color:#e8112d;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center')}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
-                    </button>
-                  </div>
-                </div>
+        {/* ---------------- คำขอที่เข้ามา ---------------- */}
+        {vm.boView === 'requests' && (
+          <div className="bo-body">
+
+            <div className="bo-kpis">
+              {vm.boKpis.map(k => (
+                <button key={k.key} onClick={k.onPick} style={k.style}>
+                  <span style={S("font-size:12px;color:#6b7280;font-family:'Kanit';font-weight:500")}>{k.label}</span>
+                  <span style={S('display:flex;align-items:baseline;gap:6px;margin-top:6px')}>
+                    <span style={k.valueStyle}>{k.value}</span>
+                    <span style={S('font-size:11.5px;color:#9ca3af')}>รายการ</span>
+                  </span>
+                </button>
               ))}
             </div>
+
+            {/* ตัวกรอง */}
+            <div style={S('background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap')}>
+              <div style={S('flex:1;min-width:240px;position:relative;display:flex;align-items:center')}>
+                <SearchIcon size={17} stroke="#9ca3af" style={S('position:absolute;left:12px;pointer-events:none')} />
+                <input
+                  type="text" value={vm.boQ} onChange={vm.onBoQ}
+                  placeholder="ค้นหาเลขที่คำขอ ชื่อผู้ขอ หรือหน่วยงาน" aria-label="ค้นหาคำขอ"
+                  style={S('width:100%;height:40px;padding:0 12px 0 36px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:9px;font-size:13px;font-family:inherit;outline:none')}
+                />
+              </div>
+              <div style={S('display:flex;align-items:center;gap:7px')}>
+                <span style={S("font-size:12px;color:#9ca3af;font-family:'Kanit'")}>จังหวัด</span>
+                <select value={vm.boProv} onChange={vm.onBoProv} aria-label="กรองตามจังหวัด" style={S('height:40px;padding:0 10px;background:#fff;border:1px solid #e5e7eb;border-radius:9px;font-size:13px;font-family:inherit;color:#374151;outline:none;cursor:pointer')}>
+                  {vm.provinces.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+              <div style={S('display:flex;align-items:center;gap:7px')}>
+                <span style={S("font-size:12px;color:#9ca3af;font-family:'Kanit'")}>ยื่นระหว่าง</span>
+                <input type="date" value={vm.boFrom} onChange={vm.onBoFrom} aria-label="ตั้งแต่วันที่" style={S('height:40px;padding:0 10px;background:#fff;border:1px solid #e5e7eb;border-radius:9px;font-size:12.5px;font-family:inherit;color:#374151;outline:none')} />
+                <span style={S('color:#9ca3af')}>–</span>
+                <input type="date" value={vm.boTo} onChange={vm.onBoTo} aria-label="ถึงวันที่" style={S('height:40px;padding:0 10px;background:#fff;border:1px solid #e5e7eb;border-radius:9px;font-size:12.5px;font-family:inherit;color:#374151;outline:none')} />
+              </div>
+              <button onClick={vm.onBoClear} style={S("height:40px;padding:0 14px;background:#f1f2f4;border:none;border-radius:9px;font-family:'Kanit';font-weight:500;font-size:12.5px;color:#374151;cursor:pointer")}>ล้าง</button>
+            </div>
+
+            {/* ชิปสถานะ */}
+            <div style={S('display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap')}>
+              {vm.boStatusChips.map(c => (
+                <button key={c.key} onClick={c.onPick} style={c.style}>
+                  {c.label}<span style={c.countStyle}>{c.count}</span>
+                </button>
+              ))}
+              <span style={S('flex:1')} />
+              <span style={S('font-size:12.5px;color:#6b7280')}>แสดง <strong style={S("font-family:'Space Mono';color:#141821")}>{vm.boCount}</strong> จาก {vm.boTotal} คำขอ</span>
+            </div>
+
+            {/* แถบเลือกหลายรายการ */}
+            {vm.boSelCount > 0 && (
+              <div style={S('background:#141821;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:14px;color:#fff;flex-wrap:wrap')}>
+                <span style={S("font-family:'Kanit';font-weight:600;font-size:13px")}>{vm.boSelLabel}</span>
+                <span style={S('flex:1')} />
+                <span style={S('font-size:12px;color:#a8aeb9')}>เปลี่ยนสถานะพร้อมกัน:</span>
+                {vm.boBulk.map(b => <button key={b.label} onClick={b.onPick} style={b.style}>{b.label}</button>)}
+                <button onClick={vm.onBoClearSel} style={S('background:none;border:none;color:#a8aeb9;font-size:12.5px;cursor:pointer;font-family:inherit;padding:0 2px')}>ยกเลิก</button>
+              </div>
+            )}
+
+            {/* ตารางคำขอ */}
+            <div style={S('background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden')}>
+              <div className="table-scroll">
+                <div className="bo-req-row" style={S("background:#fbfbfc;border-bottom:1px solid #e5e7eb;font-family:'Kanit';font-weight:600;font-size:11.5px;color:#9ca3af")}>
+                  <span /><span>เลขที่คำขอ</span><span>ผู้ขอ / หน่วยงาน</span><span>จังหวัด</span><span>รายการ</span><span>วันที่ต้องใช้</span><span>สถานะ</span>
+                </div>
+
+                {vm.boRows.map(r => (
+                  <div key={r.id} className="bo-req-row" style={r.rowStyle}>
+                    <button onClick={r.onToggle} aria-label={`เลือกคำขอ ${r.refNumber}`} style={r.checkStyle}>
+                      {r.checked && <CheckIcon size={13} stroke="#fff" strokeWidth={3.2} />}
+                    </button>
+                    <div>
+                      <div style={S("font-family:'Space Mono';font-weight:700;font-size:12.5px;color:#e8112d")}>{r.refNumber}</div>
+                      <div style={S("font-size:11px;color:#9ca3af;font-family:'Space Mono';margin-top:2px")}>{r.submittedAt}</div>
+                    </div>
+                    <div style={S('min-width:0')}>
+                      <div style={S("font-family:'Kanit';font-weight:600;font-size:13px;color:#141821;overflow:hidden;text-overflow:ellipsis;white-space:nowrap")}>{r.fullName}</div>
+                      <div style={S('font-size:11.5px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap')}>{r.agencyName} · {r.phoneNumber}</div>
+                    </div>
+                    <div style={S('font-size:12.5px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap')}>{r.province}</div>
+                    <div style={S("font-family:'Space Mono';font-size:12.5px;color:#374151")}>{r.itemsLabel}</div>
+                    <div style={S("font-size:12.5px;color:#374151;font-family:'Space Mono'")}>{r.requiredDateLabel}</div>
+                    <div style={S('display:flex;align-items:center;gap:8px')}>
+                      <select value={r.status} onChange={r.onStatus} aria-label={`สถานะของ ${r.refNumber}`} style={r.statusSelect}>
+                        {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      <button onClick={r.onOpen} aria-label={`ดูรายละเอียด ${r.refNumber}`} style={S('width:30px;height:30px;border-radius:8px;background:#f6f7f9;border:1px solid #e5e7eb;color:#6b7280;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0')}>
+                        <EyeIcon size={15} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {vm.boEmpty && (
+                <div style={S('padding:52px 20px;text-align:center')}>
+                  <div style={S("font-family:'Kanit';font-weight:600;font-size:15px;color:#374151")}>ไม่พบคำขอที่ตรงกับตัวกรอง</div>
+                  <button onClick={vm.onBoClear} style={S("margin-top:12px;height:40px;padding:0 18px;background:#141821;color:#fff;border:none;border-radius:9px;font-family:'Kanit';font-weight:600;font-size:13px;cursor:pointer")}>ล้างตัวกรอง</button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-      </main>
+        {/* ---------------- คลังสื่อ ---------------- */}
+        {vm.boView === 'catalog' && (
+          <div style={S('flex:1;min-height:0;display:flex')}>
+            <div className="bo-body" style={S('flex:1;min-width:0')}>
+
+              <div style={S('background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap')}>
+                <div style={S('flex:1;min-width:240px;position:relative;display:flex;align-items:center')}>
+                  <SearchIcon size={17} stroke="#9ca3af" style={S('position:absolute;left:12px;pointer-events:none')} />
+                  <input
+                    type="text" value={vm.boCatQ} onChange={vm.onBoCatQ}
+                    placeholder="ค้นหาชื่อสื่อในคลัง" aria-label="ค้นหาสื่อในคลัง"
+                    style={S('width:100%;height:40px;padding:0 12px 0 36px;background:#f6f7f9;border:1px solid #e5e7eb;border-radius:9px;font-size:13px;font-family:inherit;outline:none')}
+                  />
+                </div>
+                {vm.boCatChips.map(c => <button key={c.key} onClick={c.onPick} style={c.style}>{c.label}</button>)}
+              </div>
+
+              <div style={S('background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden')}>
+                <div className="table-scroll">
+                  <div className="bo-cat-row" style={S("background:#fbfbfc;border-bottom:1px solid #e5e7eb;font-family:'Kanit';font-weight:600;font-size:11.5px;color:#9ca3af")}>
+                    <span>รูป</span><span>ชื่อสื่อ</span><span>ประเภท</span><span>จำกัด/ครั้ง</span><span>คงคลัง</span><span>จัดการ</span>
+                  </div>
+
+                  {vm.boCatRows.map(m => (
+                    <div key={m.id} className="bo-cat-row" style={m.rowStyle}>
+                      <div
+                        onClick={() => m.imageUrl && vm.onOpenLightbox(m.imageUrl)}
+                        style={{ ...S('position:relative;width:44px;height:44px;border-radius:8px;overflow:hidden;background:#f1f2f4'), cursor: m.imageUrl ? 'zoom-in' : 'default' }}
+                      >
+                        <div style={m.fbStyle}>{m.catShort}</div>
+                        {m.imageUrl && <img src={m.imageUrl} alt="" referrerPolicy="no-referrer" onError={vm.onImgErr} style={S('position:absolute;inset:0;width:100%;height:100%;object-fit:cover')} />}
+                      </div>
+                      <div style={S('min-width:0')}>
+                        <div style={S("font-family:'Kanit';font-weight:600;font-size:13px;color:#141821;overflow:hidden;text-overflow:ellipsis;white-space:nowrap")}>{m.title}</div>
+                        <div style={S('font-size:11.5px;color:#9ca3af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap')}>{m.description}</div>
+                      </div>
+                      <div><span style={S("font-size:11px;font-weight:600;padding:3px 9px;border-radius:5px;background:#f6f7f9;color:#6b7280;font-family:'Kanit'")}>{m.catShort}</span></div>
+                      <div style={S("font-family:'Space Mono';font-size:12.5px;color:#374151")}>{m.maxAllowed}</div>
+                      <div style={S('display:flex;align-items:center;gap:7px')}>
+                        <span style={m.stockDot} />
+                        <span style={S("font-family:'Space Mono';font-weight:700;font-size:12.5px;color:#141821")}>{m.stockText}</span>
+                      </div>
+                      <div style={S('display:flex;align-items:center;gap:6px')}>
+                        <button onClick={m.onEdit} style={S("height:32px;padding:0 12px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;font-family:'Kanit';font-weight:500;font-size:12px;color:#374151;cursor:pointer")}>แก้ไข</button>
+                        <button onClick={m.onDelete} aria-label={`ลบ ${m.title}`} style={S('width:32px;height:32px;border-radius:8px;background:#fef2f2;border:none;color:#e8112d;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0')}>
+                          <TrashIcon size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {vm.boCatEmpty && (
+                  <div style={S('padding:52px 20px;text-align:center')}>
+                    <div style={S("font-family:'Kanit';font-weight:600;font-size:15px;color:#374151")}>ไม่พบสื่อที่ตรงกับคำค้น</div>
+                  </div>
+                )}
+              </div>
+
+              <div style={S('display:flex;gap:9px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;margin-top:14px')}>
+                <AlertIcon size={16} stroke="#b45309" style={S('flex-shrink:0;margin-top:1px')} />
+                <p style={S('margin:0;font-size:12px;color:#92400e;line-height:1.55')}>จุดสีส้มคือคงคลังต่ำกว่า 500 ชิ้น · สีแดงคือหมดคลัง ระบบจะปิดปุ่มขอสื่อในหน้าประชาชนอัตโนมัติ</p>
+              </div>
+            </div>
+
+            {vm.editOpen && <MediaEditPanel vm={vm} categories={[...MEDIA_CATEGORIES]} />}
+          </div>
+        )}
+      </div>
+
+      {vm.boDetail && <RequestDetail vm={vm} />}
     </div>
   );
 }
