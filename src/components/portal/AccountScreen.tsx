@@ -1,6 +1,6 @@
 import { AppVM } from '../../vm';
 import { css } from '../../lib/ui';
-import { CheckIcon, ExternalIcon, LockIcon, LogInIcon, LogOutIcon, TrashIcon } from '../icons';
+import { CheckIcon, LockIcon, LogInIcon, LogOutIcon, TrashIcon } from '../icons';
 
 const S = css;
 
@@ -59,26 +59,6 @@ export function AccountScreen({ vm }: { vm: AppVM }) {
                 ยังไม่มีที่อยู่บันทึกไว้ — เพิ่มได้ตอนส่งคำขอ ระบบจะจำไว้ให้ครั้งถัดไป
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* ระบบสารสนเทศอื่น ๆ */}
-      {vm.systemsVM.length > 0 && (
-        <div>
-          <h3 style={S("margin:0 0 9px;font-family:'Kanit';font-weight:600;font-size:15px;color:#141821")}>ระบบสารสนเทศอื่นๆ ของสำนักงาน</h3>
-          <div className="media-grid">
-            {vm.systemsVM.map(s => (
-              <a key={s.name} href={s.url} target={s.target} rel="noreferrer" style={S('background:#fff;border:1px solid #dfe2e7;border-radius:12px;padding:13px 14px;display:flex;align-items:flex-start;gap:12px')}>
-                <div style={S('width:40px;height:40px;border-radius:10px;background:#f6f7f9;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0')}>{s.icon}</div>
-                <div style={S('flex:1;min-width:0')}>
-                  <div style={S("font-size:10.5px;font-weight:600;color:#9ca3af;font-family:'Kanit'")}>{s.cat}</div>
-                  <div style={S("font-family:'Kanit';font-weight:600;font-size:13.5px;color:#141821;line-height:1.35")}>{s.name}</div>
-                  <div style={S('font-size:11.5px;color:#6b7280;line-height:1.5;margin-top:2px')}>{s.desc}</div>
-                </div>
-                <ExternalIcon size={15} stroke="#cbd0d6" style={S('flex-shrink:0;margin-top:2px')} />
-              </a>
-            ))}
           </div>
         </div>
       )}

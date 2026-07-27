@@ -5,7 +5,7 @@ import { HomeScreen } from './portal/HomeScreen';
 import { CatalogScreen } from './portal/CatalogScreen';
 import { MyRequestsScreen } from './portal/MyRequestsScreen';
 import { AccountScreen } from './portal/AccountScreen';
-import { ArrowRightIcon, BoxIcon, FileIcon, HomeIcon, LockIcon, ShieldIcon, UserIcon } from './icons';
+import { ArrowRightIcon, BoxIcon, FileIcon, HomeIcon, LockIcon, UserIcon } from './icons';
 
 const S = css;
 
@@ -48,9 +48,7 @@ export function Portal({ vm }: { vm: AppVM }) {
       {/* หัวเรื่อง */}
       <header style={S('position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid #eceef1')}>
         <div style={S('width:100%;max-width:1120px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:11px')}>
-          <div style={S('width:38px;height:38px;border-radius:10px;background:#e8112d;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0')}>
-            <ShieldIcon size={21} />
-          </div>
+          <img src="/logo.png" alt="โลโก้ สำนักงานคณะกรรมการควบคุมเครื่องดื่มแอลกอฮอล์" width={38} height={38} style={S('width:38px;height:38px;border-radius:10px;object-fit:contain;flex-shrink:0')} />
           <div style={S('flex:1;min-width:0')}>
             <div style={S("font-family:'Kanit';font-weight:600;font-size:15px;color:#141821;line-height:1.2")}>ขอสนับสนุนสื่อ</div>
             <div style={S('font-size:10.5px;color:#9ca3af;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap')}>สำนักงานคณะกรรมการควบคุมเครื่องดื่มแอลกอฮอล์</div>

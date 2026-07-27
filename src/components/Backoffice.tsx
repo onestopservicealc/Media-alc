@@ -3,7 +3,7 @@ import { css, MEDIA_CATEGORIES, STATUSES } from '../lib/ui';
 import { MediaEditPanel } from './backoffice/MediaEditPanel';
 import { RequestDetail } from './backoffice/RequestDetail';
 import {
-  AlertIcon, ArrowLeftIcon, CheckIcon, DownloadIcon, EyeIcon, LogOutIcon, SearchIcon, ShieldPlainIcon, TrashIcon,
+  AlertIcon, ArrowLeftIcon, CheckIcon, DownloadIcon, EyeIcon, LogOutIcon, SearchIcon, TrashIcon,
 } from './icons';
 
 const S = css;
@@ -15,9 +15,7 @@ export function Backoffice({ vm }: { vm: AppVM }) {
       {/* เมนูข้าง */}
       <aside className="bo-side">
         <div style={S('padding:18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid #262b36')}>
-          <div style={S('width:34px;height:34px;border-radius:8px;background:#e8112d;display:flex;align-items:center;justify-content:center;flex-shrink:0')}>
-            <ShieldPlainIcon size={18} />
-          </div>
+          <img src="/logo.png" alt="โลโก้ สำนักงานคณะกรรมการควบคุมเครื่องดื่มแอลกอฮอล์" width={34} height={34} style={S('width:34px;height:34px;border-radius:8px;object-fit:contain;flex-shrink:0;background:#fff')} />
           <div style={S('flex:1;min-width:0')}>
             <div style={S("font-family:'Kanit';font-weight:600;font-size:13.5px;line-height:1.2")}>ระบบจัดการสื่อ</div>
             <div style={S('font-size:10.5px;color:#8b909b')}>สคอ. · หลังบ้าน</div>
